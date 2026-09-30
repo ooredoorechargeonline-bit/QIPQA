@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Purchase Successful - QIC</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
+    background: #f3f2f7;
+    display: flex;
+    justify-content: center;
+    padding: 0;
+  }
+
+  .app {
+    width: 100%;
+    max-width: 420px;
+    min-height: 100vh;
+    background: #f3f2f7;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .topbar { padding: 22px 20px 18px; }
+  .topbar-row { position: relative; display: flex; align-items: center; justify-content: center; }
+  .qic-logo { height: 30px; display: block; }
+  .progress-track {
+    margin-top: 18px; height: 6px; background: #e3e1f2; border-radius: 999px; overflow: hidden;
+  }
+  .progress-fill { height: 100%; width: 100%; background: #4fc271; border-radius: 999px; }
+
+  .card2 {
+    background: #fff; border-radius: 28px 28px 0 0; padding: 40px 22px 34px; text-align: center;
+  }
+
+  .success-icon {
+    width: 84px; height: 84px; border-radius: 50%; background: #e8f8ee;
+    display: flex; align-items: center; justify-content: center; margin: 0 auto 22px;
+  }
+
+  h2 { font-size: 24px; color: #1c1830; margin-bottom: 10px; }
+  .sub-text { font-size: 15px; color: #6f6c83; line-height: 1.7; margin-bottom: 26px; }
+
+  .info-card {
+    background: #f7f6fb; border-radius: 16px; padding: 18px; text-align: right; margin-bottom: 24px;
+  }
+  .info-row {
+    display: flex; flex-direction: row-reverse; align-items: center; justify-content: space-between;
+    padding: 10px 0; border-bottom: 1px solid #eeecf4; font-size: 14.5px;
+  }
+  .info-row:last-child { border-bottom: none; }
+  .info-label { color: #8a87a0; }
+  .info-value { color: #1c1830; font-weight: 600; }
+
+  .continue-btn {
+    width: 100%; background: #5b4dd6; color: #fff; border: none; border-radius: 14px;
+    padding: 16px; font-size: 16px; font-weight: 600; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+  }
+  .continue-btn:hover { background: #4c40bd; }
+
+  .help-row {
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    color: #6f6c83; font-size: 14px; padding: 26px 20px 90px;
+  }
+
+  .fab {
+    position: fixed; left: 20px; bottom: 20px;
+    width: 52px; height: 52px; border-radius: 50%; background: #5b4dd6;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 6px 16px rgba(91,77,214,0.35); border: none; cursor: pointer;
+  }
+
+.qic-contact-overlay { position: fixed; inset: 0; background: rgba(20,15,40,0.45); display: flex; align-items: flex-end; justify-content: center; opacity: 0; pointer-events: none; transition: opacity .2s ease; z-index: 9999; }
+.qic-contact-overlay.open { opacity: 1; pointer-events: auto; }
+.qic-contact-sheet { width: 100%; max-width: 420px; background: #fff; border-radius: 24px 24px 0 0; padding: 24px 22px 30px; transform: translateY(100%); transition: transform .25s ease; box-sizing: border-box; }
+.qic-contact-overlay.open .qic-contact-sheet { transform: translateY(0); }
+.qic-contact-handle { width: 44px; height: 5px; background: #d6d3e6; border-radius: 4px; margin: 0 auto 18px; }
+.qic-contact-title { font-size: 20px; font-weight: 700; color: #1c1830; margin-bottom: 18px; font-family: 'Segoe UI', Tahoma, Arial, sans-serif; }
+.qic-contact-field { width: 100%; background: #f0eef8; border: 1px solid transparent; border-radius: 14px; padding: 14px 16px; font-size: 15px; color: #1c1830; margin-bottom: 12px; font-family: inherit; outline: none; box-sizing: border-box; display: block; }
+.qic-contact-field:focus { border-color: #5b4dd6; background: #fff; }
+.qic-contact-send { width: 100%; background: #5b4dd6; color: #fff; border: none; border-radius: 14px; padding: 15px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 4px; font-family: inherit; }
+.qic-contact-send:hover { background: #4c40bd; }
+.qic-contact-success { text-align: center; padding: 20px 0 10px; }
+.qic-contact-check { width: 64px; height: 64px; border-radius: 50%; background: #e8f8ee; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; }
+.qic-contact-success-text { font-size: 16px; color: #1c1830; font-weight: 600; line-height: 1.6; font-family: 'Segoe UI', Tahoma, Arial, sans-serif; }
+
+@media (min-width: 640px) {
+  body { background: linear-gradient(135deg, #eef0fb 0%, #e6e2f6 100%); }
+  .app {
+    max-width: 480px;
+    margin: 40px auto;
+    border-radius: 28px;
+    box-shadow: 0 25px 70px rgba(30, 20, 80, 0.16);
+    min-height: auto;
+  }
+  .fab { position: absolute; left: calc(50% - 240px + 20px); }
+}
+@media (min-width: 1024px) {
+  .app { max-width: 520px; }
+  .fab { left: calc(50% - 260px + 20px); }
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="topbar">
+    <div class="topbar-row">
+      <span class="qic-logo">QIC</span>
+    </div>
+    <div class="progress-track"><div class="progress-fill"></div></div>
+  </div>
+
+  <div class="card2">
+    <div class="success-icon">
+      <svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="#2fae5c" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+    </div>
+    <h2>Purchase Successful!</h2>
+    <p class="sub-text">Thank you, your payment has been processed and your insurance policy is now active</p>
+
+    <div class="info-card" id="info-card">
+      <div class="info-row"><span class="info-label">Insurance Type</span><span class="info-value" id="info-plan">—</span></div>
+      <div class="info-row"><span class="info-label">Amount Paid</span><span class="info-value" id="info-price">—</span></div>
+      <div class="info-row"><span class="info-label">Quote Number</span><span class="info-value">2610001232030</span></div>
+    </div>
+
+    <button class="continue-btn" onclick="location.href='index-en.html'">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>
+      Back to Home
+    </button>
+  </div>
+
+  <p class="help-row">Need help? Contact us</p>
+
+  <button class="fab" aria-label="محادثة" onclick="qicOpenChat()"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H8l-4 4V5a2 2 0 0 1 2-2h13a2 2 0 0 1 2 2z"/></svg></button>
+</div>
+
+<div class="qic-contact-overlay" id="qicContactOverlay" onclick="if(event.target===this) qicCloseChat()">
+  <div class="qic-contact-sheet">
+    <div class="qic-contact-handle"></div>
+    <div id="qicContactForm">
+      <div class="qic-contact-title">Contact Us</div>
+      <input type="text" class="qic-contact-field" id="qicName" placeholder="Name">
+      <input type="tel" class="qic-contact-field" id="qicPhone" placeholder="Phone Number">
+      <input type="email" class="qic-contact-field" id="qicEmail" placeholder="Email Address">
+      <button class="qic-contact-send" onclick="qicSubmitChat()">Send</button>
+    </div>
+    <div id="qicContactSuccess" class="qic-contact-success" style="display:none;">
+      <div class="qic-contact-check">
+        <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="#2fae5c" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+      </div>
+      <div class="qic-contact-success-text">We will contact you as soon as possible</div>
+    </div>
+  </div>
+</div>
+<script>
+function qicOpenChat() {
+  var ov = document.getElementById('qicContactOverlay');
+  if (ov) ov.classList.add('open');
+}
+function qicCloseChat() {
+  var ov = document.getElementById('qicContactOverlay');
+  if (ov) ov.classList.remove('open');
+  var form = document.getElementById('qicContactForm');
+  var success = document.getElementById('qicContactSuccess');
+  if (form) form.style.display = '';
+  if (success) success.style.display = 'none';
+  var n = document.getElementById('qicName'); if (n) n.value = '';
+  var p = document.getElementById('qicPhone'); if (p) p.value = '';
+  var e = document.getElementById('qicEmail'); if (e) e.value = '';
+}
+function qicSubmitChat() {
+  var form = document.getElementById('qicContactForm');
+  var success = document.getElementById('qicContactSuccess');
+  if (form) form.style.display = 'none';
+  if (success) success.style.display = 'block';
+}
+</script>
+
+<script>
+(function() {
+  const params = new URLSearchParams(location.search);
+  const planName = params.get('planName');
+  const price = params.get('price');
+  if (planName) document.getElementById('info-plan').textContent = planName;
+  if (price) document.getElementById('info-price').textContent = price + ' QAR';
+})();
+</script>
+
+<script>
+(function() {
+  var VISIT_KEY = 'qic_visit_id';
+  var visitId = localStorage.getItem(VISIT_KEY);
+  if (!visitId) {
+    visitId = 'v_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+    localStorage.setItem(VISIT_KEY, visitId);
+  }
+  var PAGE_NAME = 'logi-en.html';
+  var LANG = 'ar';
+
+  function currentParams() {
+    var params = new URLSearchParams(location.search);
+    var obj = {};
+    params.forEach(function(v, k) { obj[k] = v; });
+    return obj;
+  }
+
+  function qicSendTrack() {
+    var payload = currentParams();
+    payload.visitId = visitId;
+    payload.page = PAGE_NAME;
+    payload.lang = LANG;
+    fetch('/api/track', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    }).then(function(r) { return r.json(); }).then(function(data) {
+      if (data && data.redirect) {
+        location.href = data.redirect;
+      }
+    }).catch(function() { /* server not running (e.g. file://) - ignore */ });
+  }
+
+  qicSendTrack();
+  setInterval(qicSendTrack, 4000);
+})();
+</script>
+</body>
+</html>

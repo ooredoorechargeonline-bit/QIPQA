@@ -1,0 +1,13 @@
+{
+  "name": "qic-car-insurance-flow",
+  "version": "1.0.0",
+  "description": "QIC car insurance flow - static HTML pages served via Express",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}

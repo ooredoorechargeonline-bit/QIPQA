@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>اختبار لوحة الإدارة</title>
+<style>
+body { font-family: Arial, sans-serif; margin: 20px; }
+.test { margin: 20px 0; padding: 10px; border: 1px solid #ccc; }
+.pass { background: #90EE90; }
+.fail { background: #FFB6C6; }
+pre { background: #f0f0f0; padding: 10px; overflow-x: auto; }
+</style>
+</head>
+<body>
+<h1>اختبار لوحة الإدارة</h1>
+
+<div class="test" id="test1">
+<h3>اختبار 1: التحقق من كلمة المرور</h3>
+<pre id="result1">جاري الاختبار...</pre>
+</div>
+
+<div class="test" id="test2">
+<h3>اختبار 2: جلب الطلبات</h3>
+<pre id="result2">جاري الاختبار...</pre>
+</div>
+
+<div class="test" id="test3">
+<h3>اختبار 3: تحميل صفحة الإدارة</h3>
+<pre id="result3">جاري الاختبار...</pre>
+</div>
+
+<script>
+async function test1() {
+  try {
+    const r = await fetch("/api/admin/check", {
+      headers: { "x-admin-password": "Ha098765@@" }
+    });
+    const data = await r.json();
+    if (r.ok) {
+      document.getElementById("test1").classList.add("pass");
+      document.getElementById("result1").textContent = "✓ نجح\n" + JSON.stringify(data, null, 2);
+    } else {
+      document.getElementById("test1").classList.add("fail");
+      document.getElementById("result1").textContent = "✗ فشل\n" + JSON.stringify(data, null, 2);
+    }
+  } catch(e) {
+    document.getElementById("test1").classList.add("fail");
+    document.getElementById("result1").textContent = "✗ خطأ: " + e.message;
+  }
+}
+
+async function test2() {
+  try {
+    const r = await fetch("/api/admin/orders", {
+      headers: { "x-admin-password": "Ha098765@@" }
+    });
+    const data = await r.json();
+    if (r.ok) {
+      document.getElementById("test2").classList.add("pass");
+      document.getElementById("result2").textContent = "✓ نجح\n" + JSON.stringify(data, null, 2);
+    } else {
+      document.getElementById("test2").classList.add("fail");
+      document.getElementById("result2").textContent = "✗ فشل\n" + JSON.stringify(data, null, 2);
+    }
+  } catch(e) {
+    document.getElementById("test2").classList.add("fail");
+    document.getElementById("result2").textContent = "✗ خطأ: " + e.message;
+  }
+}
+
+async function test3() {
+  try {
+    const r = await fetch("/admin.html");
+    if (r.ok) {
+      document.getElementById("test3").classList.add("pass");
+      document.getElementById("result3").textContent = "✓ تحميل الصفحة بنجاح";
+    } else {
+      document.getElementById("test3").classList.add("fail");
+      document.getElementById("result3").textContent = "✗ فشل التحميل: " + r.status;
+    }
+  } catch(e) {
+    document.getElementById("test3").classList.add("fail");
+    document.getElementById("result3").textContent = "✗ خطأ: " + e.message;
+  }
+}
+
+test1();
+test2();
+test3();
+</script>
+</body>
+</html>
