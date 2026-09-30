@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Additional Details - QIC</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
+    background: #f3f2f7;
+    display: flex;
+    justify-content: center;
+    padding: 0;
+  }
+
+  .app {
+    width: 100%;
+    max-width: 420px;
+    min-height: 100vh;
+    background: #f3f2f7;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .topbar { padding: 22px 20px 18px; }
+  .topbar-row { position: relative; display: flex; align-items: center; justify-content: center; }
+  .qic-logo { height: 30px; display: block; }
+  .topbar-row svg { position: absolute; left: 0; }
+  .progress-track {
+    margin-top: 18px; height: 6px; background: #e3e1f2; border-radius: 999px; overflow: hidden;
+  }
+  .progress-fill { height: 100%; width: 55%; background: #4fc271; border-radius: 999px; }
+
+  .card2 {
+    background: #fff; border-radius: 28px 28px 0 0; padding: 30px 22px 34px;
+  }
+
+  h2 { font-size: 26px; color: #1c1830; text-align: left; margin-bottom: 22px; line-height: 1.3; }
+
+  .car-card {
+    border: 1px solid #e6e4f0; border-radius: 16px; padding: 16px;
+    display: flex; align-items: flex-start; gap: 12px;
+    margin-bottom: 18px;
+  }
+  .car-icon-badge {
+    width: 44px; height: 44px; border-radius: 50%; background: #f0eef8;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .car-card-body { flex: 1; text-align: left; }
+  .car-title { font-size: 17px; font-weight: 600; color: #1c1830; margin-bottom: 8px; }
+  .car-meta { font-size: 13.5px; color: #8a87a0; margin-bottom: 6px; }
+  .car-plate { font-size: 13.5px; color: #8a87a0; }
+  .pencil-btn { border: none; background: none; cursor: pointer; padding: 2px; flex-shrink: 0; }
+
+  .field {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 10px; background: #f0eef8; border-radius: 14px; padding: 14px 16px; margin-bottom: 14px;
+    border: 1px solid transparent;
+  }
+  .field.active { background: #fff; border-color: #5b4dd6; }
+  .field.disabled { opacity: 0.55; }
+
+  .field-label-wrap { flex: 1; text-align: left; }
+  .field-label { font-size: 13px; color: #8a87a0; margin-bottom: 2px; }
+  .field-value { font-size: 16px; color: #1c1830; font-weight: 600; }
+
+  .field input {
+    flex: 1; border: none; background: none; text-align: left;
+    font-size: 15px; color: #1c1830; font-family: inherit; outline: none;
+  }
+  .field input::placeholder { color: #4a4762; }
+
+  .field-icons { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+
+  .continue-btn {
+    width: 100%; background: #5b4dd6; color: #fff; border: none; border-radius: 14px;
+    padding: 16px; font-size: 16px; font-weight: 600; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 6px;
+  }
+  .continue-btn:hover { background: #4c40bd; }
+
+  .help-row {
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    color: #6f6c83; font-size: 14px; padding: 26px 20px 90px;
+  }
+
+  .fab {
+    position: fixed; right: 20px; bottom: 20px;
+    width: 52px; height: 52px; border-radius: 50%; background: #5b4dd6;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 6px 16px rgba(91,77,214,0.35); border: none; cursor: pointer;
+  }
+
+  .overlay {
+    position: fixed; inset: 0; background: rgba(20,15,40,0.35);
+    display: flex; align-items: flex-end; justify-content: center;
+    opacity: 0; pointer-events: none; transition: opacity .2s ease; z-index: 50;
+  }
+  .overlay.open { opacity: 1; pointer-events: auto; }
+
+  .sheet {
+    width: 100%; max-width: 420px; max-height: 82vh; overflow-y: auto;
+    background: #fff; border-radius: 24px 24px 0 0; padding: 14px 20px 26px;
+    transform: translateY(100%); transition: transform .25s ease;
+  }
+  .overlay.open .sheet { transform: translateY(0); }
+
+  .sheet-handle {
+    width: 44px; height: 5px; background: #d6d3e6; border-radius: 4px; margin: 0 auto 18px;
+  }
+
+  .sheet h3 { font-size: 22px; color: #1c1830; text-align: left; margin-bottom: 16px; }
+
+  .sheet-current {
+    border: 1px solid #cfc9ef; border-radius: 14px; padding: 12px 16px; text-align: left;
+    margin-bottom: 8px;
+  }
+  .sheet-current .field-label { font-size: 13px; color: #8a87a0; margin-bottom: 2px; }
+  .sheet-current .field-value { font-size: 17px; color: #1c1830; font-weight: 600; }
+
+  .sheet-option {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 4px; border-bottom: 1px solid #eeecf4; cursor: pointer; text-align: left;
+    font-size: 16px; color: #1c1830;
+  }
+  .sheet-option:last-child { border-bottom: none; }
+  .sheet-option.selected { color: #5b4dd6; font-weight: 600; }
+  .sheet-option .check { width: 18px; flex-shrink: 0; }
+  .sheet-option .check svg { display: none; }
+  .sheet-option.selected .check svg { display: block; }
+
+  .dob-input {
+    border: 1px solid #5b4dd6; border-radius: 14px; padding: 12px 16px; text-align: left;
+    margin-bottom: 18px;
+  }
+  .dob-input .field-label { font-size: 13px; color: #8a87a0; margin-bottom: 2px; }
+  .dob-input .field-value { font-size: 17px; font-weight: 600; }
+
+  .cal-nav {
+    display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;
+  }
+  .cal-nav-btn {
+    border: none; background: none; padding: 6px; cursor: pointer; display: flex;
+  }
+  .cal-nav-center { display: flex; gap: 8px; }
+  .cal-nav-pill {
+    border: 1px solid #e6e4f0; border-radius: 10px; padding: 8px 16px; font-size: 16px;
+    font-weight: 600; color: #1c1830; background: none; cursor: pointer;
+  }
+
+  .cal-weekdays {
+    display: grid; grid-template-columns: repeat(7, 1fr); text-align: center;
+    font-size: 13px; color: #4a4762; margin-bottom: 8px;
+  }
+  .cal-days {
+    display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px;
+  }
+  .cal-day {
+    aspect-ratio: 1; display: flex; align-items: center; justify-content: center;
+    border-radius: 50%; font-size: 15px; color: #b7b4c6; cursor: pointer; border: none; background: none;
+  }
+  .cal-day.in-month { color: #1c1830; }
+  .cal-day.selected { background: #5b4dd6; color: #fff; }
+  .cal-day:disabled { visibility: hidden; }
+
+  .picker-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
+    max-height: 320px; overflow-y: auto; margin-bottom: 14px;
+  }
+  .picker-cell {
+    border: 1px solid #e6e4f0; border-radius: 12px; padding: 16px 8px; text-align: center;
+    font-size: 17px; font-weight: 600; color: #1c1830; cursor: pointer; background: none;
+  }
+  .picker-cell.selected { background: #5b4dd6; border-color: #5b4dd6; color: #fff; }
+  .picker-cell.current { border-color: #5b4dd6; color: #5b4dd6; }
+
+  .back-to-cal {
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    border: 1px solid #e6e4f0; border-radius: 14px; padding: 14px; color: #1c1830;
+    font-size: 15px; background: none; width: 100%; cursor: pointer; margin-bottom: 8px;
+  }
+
+  .dob-save-btn {
+    width: 100%; background: #5b4dd6; color: #fff; border: none; border-radius: 14px;
+    padding: 16px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 10px;
+  }
+
+.qic-contact-overlay { position: fixed; inset: 0; background: rgba(20,15,40,0.45); display: flex; align-items: flex-end; justify-content: center; opacity: 0; pointer-events: none; transition: opacity .2s ease; z-index: 9999; }
+.qic-contact-overlay.open { opacity: 1; pointer-events: auto; }
+.qic-contact-sheet { width: 100%; max-width: 420px; background: #fff; border-radius: 24px 24px 0 0; padding: 24px 22px 30px; transform: translateY(100%); transition: transform .25s ease; box-sizing: border-box; }
+.qic-contact-overlay.open .qic-contact-sheet { transform: translateY(0); }
+.qic-contact-handle { width: 44px; height: 5px; background: #d6d3e6; border-radius: 4px; margin: 0 auto 18px; }
+.qic-contact-title { font-size: 20px; font-weight: 700; color: #1c1830; margin-bottom: 18px; font-family: 'Segoe UI', Tahoma, Arial, sans-serif; }
+.qic-contact-field { width: 100%; background: #f0eef8; border: 1px solid transparent; border-radius: 14px; padding: 14px 16px; font-size: 15px; color: #1c1830; margin-bottom: 12px; font-family: inherit; outline: none; box-sizing: border-box; display: block; }
+.qic-contact-field:focus { border-color: #5b4dd6; background: #fff; }
+.qic-contact-send { width: 100%; background: #5b4dd6; color: #fff; border: none; border-radius: 14px; padding: 15px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 4px; font-family: inherit; }
+.qic-contact-send:hover { background: #4c40bd; }
+.qic-contact-success { text-align: center; padding: 20px 0 10px; }
+.qic-contact-check { width: 64px; height: 64px; border-radius: 50%; background: #e8f8ee; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; }
+.qic-contact-success-text { font-size: 16px; color: #1c1830; font-weight: 600; line-height: 1.6; font-family: 'Segoe UI', Tahoma, Arial, sans-serif; }
+
+@media (min-width: 640px) {
+  body { background: linear-gradient(135deg, #eef0fb 0%, #e6e2f6 100%); }
+  .app {
+    max-width: 480px;
+    margin: 40px auto;
+    border-radius: 28px;
+    box-shadow: 0 25px 70px rgba(30, 20, 80, 0.16);
+    min-height: auto;
+  }
+  .fab { position: absolute; right: calc(50% - 240px + 20px); }
+}
+@media (min-width: 1024px) {
+  .app { max-width: 520px; }
+  .fab { right: calc(50% - 260px + 20px); }
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="topbar">
+    <div class="topbar-row">
+      <span class="qic-logo"><img src="data:image/png;base64,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" alt="QIC" style="height:100%;"></span>
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#1c1830" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 18l-6-6 6-6"/></svg>
+    </div>
+    <div class="progress-track"><div class="progress-fill"></div></div>
+  </div>
+
+  <div class="card2">
+    <h2>Please fill in the required details</h2>
+
+    <div class="car-card">
+      <div class="car-icon-badge"><svg viewBox="0 0 24 24" width="22" height="22" fill="#2b2745"><path d="M18.9 8.3c-.3-1-.6-2-1.6-2.5-.7-.4-2.7-.6-5.3-.6s-4.6.2-5.3.6c-1 .5-1.3 1.5-1.6 2.5C4.3 8.6 3 9 3 10.5V15c0 .6.4 1 1 1h1v1.2c0 .4.3.8.8.8h1.4c.4 0 .8-.3.8-.8V16h8v1.2c0 .4.3.8.8.8h1.4c.4 0 .8-.3.8-.8V16h1c.6 0 1-.4 1-1v-4.5c0-1.5-1.3-1.9-1.1-2.2zM7.5 13c-.8 0-1.5-.7-1.5-1.5S6.7 10 7.5 10 9 10.7 9 11.5 8.3 13 7.5 13zm9 0c-.8 0-1.5-.7-1.5-1.5s.7-1.5 1.5-1.5 1.5.7 1.5 1.5-.7 1.5-1.5 1.5zM6 8.7c.2-.6.4-1.2.9-1.4.5-.3 2.4-.5 5.1-.5s4.6.2 5.1.5c.5.3.7.9.9 1.4.1.4-.2.8-.6.8H6.6c-.4 0-.7-.4-.6-.8z"/></svg></div>
+      <div class="car-card-body">
+        <div class="car-title" id="car-title-line" style="display:none;"></div>
+        <div class="car-meta" id="car-meta-line" style="display:none;"></div>
+        <div class="car-plate" id="car-plate-line" style="display:none;">Chassis Number: <span id="plate-number"></span></div>
+      </div>
+      <button class="pencil-btn" aria-label="تعديل"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#4a4762" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></button>
+    </div>
+
+    <div class="field" id="car-type-field" onclick="openSheet()" style="cursor:pointer;">
+      <div class="field-icons"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#4a4762" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></div>
+      <div class="field-label-wrap">
+        <div class="field-label">Car Type</div>
+        <div class="field-value" id="car-type-value" style="color:#a9a7ba; font-weight:400; font-size:15px;">Choose car type</div>
+      </div>
+    </div>
+
+    <div class="field" id="reg-date-field" onclick="openYearSheet()" style="cursor:pointer;">
+      <div class="field-icons"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#4a4762" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#8a87a0" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 0 1 4.9.8c0 1.7-2.4 2-2.4 3.5"/><circle cx="12" cy="17" r="0.6" fill="#8a87a0" stroke="none"/></svg></div>
+      <div class="field-label-wrap">
+        <div class="field-value" id="reg-date-value" style="color:#4a4762; font-weight:400; font-size:15px;">Car Registration Date</div>
+      </div>
+    </div>
+
+    <div class="field active">
+      <div class="field-icons"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#8a87a0" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 0 1 4.9.8c0 1.7-2.4 2-2.4 3.5"/><circle cx="12" cy="17" r="0.6" fill="#8a87a0" stroke="none"/></svg></div>
+      <input type="text" placeholder="Qatari ID or Company Number" id="qid-input">
+    </div>
+
+    <div class="field" id="dob-field" onclick="openDobSheet()" style="cursor:pointer;">
+      <div class="field-icons"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#b7b4c6" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/></svg></div>
+      <div class="field-label-wrap">
+        <div class="field-value" id="dob-value" style="color:#4a4762; font-weight:400; font-size:15px;">Date of Birth: Only for Qatari ID holders</div>
+      </div>
+    </div>
+
+    <div class="field" style="margin-top: 18px;">
+      <div class="field-icons"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#4a4762" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></div>
+      <div class="field-label-wrap">
+        <div class="field-value" style="color:#4a4762; font-weight:400; font-size:15px;">Use a promo code</div>
+      </div>
+    </div>
+
+    <button class="continue-btn" onclick="continueFlow()">
+      Continue
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+    </button>
+  </div>
+
+  <p class="help-row">Need help? Contact us</p>
+
+  <button class="fab" aria-label="Chat" onclick="qicOpenChat()"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H8l-4 4V5a2 2 0 0 1 2-2h13a2 2 0 0 1 2 2z"/></svg></button>
+
+  <div class="overlay" id="type-overlay" onclick="if(event.target===this) closeSheet()">
+    <div class="sheet">
+      <div class="sheet-handle"></div>
+      <h3>Car Type</h3>
+      <div class="sheet-current">
+        <div class="field-label">Car Type</div>
+        <div class="field-value" id="sheet-current-value" style="color:#a9a7ba; font-weight:400;">Choose car type</div>
+      </div>
+      <div id="sheet-options">
+        <div class="sheet-option" data-value="Crossover" onclick="selectCarType('Crossover')">
+      <span class="check"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#5b4dd6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>
+      <span>Crossover</span>
+    </div>
+<div class="sheet-option" data-value="Sedan" onclick="selectCarType('Sedan')">
+      <span class="check"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#5b4dd6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>
+      <span>Sedan</span>
+    </div>
+<div class="sheet-option" data-value="SUV" onclick="selectCarType('SUV')">
+      <span class="check"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#5b4dd6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>
+      <span>SUV</span>
+    </div>
+<div class="sheet-option" data-value="Pickup (under 1 ton)" onclick="selectCarType('Pickup (under 1 ton)')">
+      <span class="check"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#5b4dd6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>
+      <span>Pickup (under 1 ton)</span>
+    </div>
+<div class="sheet-option" data-value="Pickup (over 1 ton)" onclick="selectCarType('Pickup (over 1 ton)')">
+      <span class="check"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#5b4dd6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>
+      <span>Pickup (over 1 ton)</span>
+    </div>
+<div class="sheet-option" data-value="Coupe" onclick="selectCarType('Coupe')">
+      <span class="check"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#5b4dd6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>
+      <span>Coupe</span>
+    </div>
+<div class="sheet-option" data-value="Sports" onclick="selectCarType('Sports')">
+      <span class="check"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#5b4dd6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>
+      <span>Sports</span>
+    </div>
+<div class="sheet-option" data-value="Hatchback" onclick="selectCarType('Hatchback')">
+      <span class="check"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#5b4dd6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>
+      <span>Hatchback</span>
+    </div>
+<div class="sheet-option" data-value="Bus" onclick="selectCarType('Bus')">
+      <span class="check"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#5b4dd6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>
+      <span>Bus</span>
+    </div>
+<div class="sheet-option" data-value="Van" onclick="selectCarType('Van')">
+      <span class="check"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#5b4dd6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>
+      <span>Van</span>
+    </div>
+<div class="sheet-option" data-value="Ambulance" onclick="selectCarType('Ambulance')">
+      <span class="check"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#5b4dd6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>
+      <span>Ambulance</span>
+    </div>
+<div class="sheet-option" data-value="Truck" onclick="selectCarType('Truck')">
+      <span class="check"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#5b4dd6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>
+      <span>Truck</span>
+    </div>
+<div class="sheet-option" data-value="Motorcycle" onclick="selectCarType('Motorcycle')">
+      <span class="check"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#5b4dd6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>
+      <span>Motorcycle</span>
+    </div>
+<div class="sheet-option" data-value="Box Truck" onclick="selectCarType('Box Truck')">
+      <span class="check"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#5b4dd6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>
+      <span>Box Truck</span>
+    </div>
+<div class="sheet-option" data-value="Heavy Truck" onclick="selectCarType('Heavy Truck')">
+      <span class="check"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#5b4dd6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>
+      <span>Heavy Truck</span>
+    </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="year-overlay" onclick="if(event.target===this) closeYearSheet()">
+    <div class="sheet">
+      <div class="sheet-handle"></div>
+      <h3>Car Registration Date</h3>
+      <div class="sheet-current">
+        <div class="field-label">Registration Year</div>
+        <div class="field-value" id="sheet-current-year" style="color:#a9a7ba; font-weight:400;">Choose year</div>
+      </div>
+      <div id="year-options">
+        <div class="sheet-option" data-value="2027" onclick="selectYear('2027')">
+      <span class="check"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#5b4dd6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>
+      <span>2027</span>
+    </div>
+<div class="sheet-option" data-value="2026" onclick="selectYear('2026')">
+      <span class="check"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#5b4dd6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>
+      <span>2026</span>
+    </div>
+<div class="sheet-option" data-value="2025" onclick="selectYear('2025')">
+      <span class="check"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#5b4dd6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>
+      <span>2025</span>
+    </div>
+<div class="sheet-option" data-value="2024" onclick="selectYear('2024')">
+      <span class="check"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#5b4dd6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>
+      <span>2024</span>
+    </div>
+<div class="sheet-option" data-value="2023" onclick="selectYear('2023')">
+      <span class="check"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#5b4dd6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>
+      <span>2023</span>
+    </div>
+<div class="sheet-option" data-value="2022" onclick="selectYear('2022')">
+      <span class="check"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#5b4dd6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>
+      <span>2022</span>
+    </div>
+<div class="sheet-option" data-value="2021" onclick="selectYear('2021')">
+      <span class="check"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#5b4dd6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>
+      <span>2021</span>
+    </div>
+<div class="sheet-option" data-value="2020" onclick="selectYear('2020')">
+      <span class="check"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#5b4dd6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>
+      <span>2020</span>
+    </div>
+<div class="sheet-option" data-value="2019" onclick="selectYear('2019')">
+      <span class="check"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#5b4dd6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>
+      <span>2019</span>
+    </div>
+<div class="sheet-option" data-value="2018" onclick="selectYear('2018')">
+      <span class="check"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#5b4dd6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>
+      <span>2018</span>
+    </div>
+<div class="sheet-option" data-value="2017" onclick="selectYear('2017')">
+      <span class="check"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#5b4dd6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>
+      <span>2017</span>
+    </div>
+<div class="sheet-option" data-value="2016" onclick="selectYear('2016')">
+      <span class="check"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#5b4dd6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>
+      <span>2016</span>
+    </div>
+<div class="sheet-option" data-value="2015" onclick="selectYear('2015')">
+      <span class="check"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#5b4dd6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>
+      <span>2015</span>
+    </div>
+<div class="sheet-option" data-value="2014" onclick="selectYear('2014')">
+      <span class="check"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#5b4dd6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>
+      <span>2014</span>
+    </div>
+<div class="sheet-option" data-value="2013" onclick="selectYear('2013')">
+      <span class="check"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#5b4dd6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>
+      <span>2013</span>
+    </div>
+<div class="sheet-option" data-value="2012" onclick="selectYear('2012')">
+      <span class="check"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#5b4dd6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>
+      <span>2012</span>
+    </div>
+<div class="sheet-option" data-value="2011" onclick="selectYear('2011')">
+      <span class="check"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#5b4dd6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>
+      <span>2011</span>
+    </div>
+<div class="sheet-option" data-value="2010" onclick="selectYear('2010')">
+      <span class="check"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#5b4dd6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>
+      <span>2010</span>
+    </div>
+<div class="sheet-option" data-value="2009" onclick="selectYear('2009')">
+      <span class="check"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#5b4dd6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>
+      <span>2009</span>
+    </div>
+<div class="sheet-option" data-value="2008" onclick="selectYear('2008')">
+      <span class="check"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#5b4dd6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>
+      <span>2008</span>
+    </div>
+<div class="sheet-option" data-value="2007" onclick="selectYear('2007')">
+      <span class="check"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#5b4dd6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>
+      <span>2007</span>
+    </div>
+<div class="sheet-option" data-value="2006" onclick="selectYear('2006')">
+      <span class="check"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#5b4dd6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>
+      <span>2006</span>
+    </div>
+<div class="sheet-option" data-value="2005" onclick="selectYear('2005')">
+      <span class="check"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#5b4dd6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>
+      <span>2005</span>
+    </div>
+<div class="sheet-option" data-value="2004" onclick="selectYear('2004')">
+      <span class="check"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#5b4dd6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>
+      <span>2004</span>
+    </div>
+<div class="sheet-option" data-value="2003" onclick="selectYear('2003')">
+      <span class="check"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#5b4dd6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>
+      <span>2003</span>
+    </div>
+<div class="sheet-option" data-value="2002" onclick="selectYear('2002')">
+      <span class="check"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#5b4dd6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>
+      <span>2002</span>
+    </div>
+<div class="sheet-option" data-value="2001" onclick="selectYear('2001')">
+      <span class="check"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#5b4dd6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>
+      <span>2001</span>
+    </div>
+<div class="sheet-option" data-value="2000" onclick="selectYear('2000')">
+      <span class="check"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#5b4dd6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>
+      <span>2000</span>
+    </div>
+<div class="sheet-option" data-value="1999" onclick="selectYear('1999')">
+      <span class="check"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#5b4dd6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>
+      <span>1999</span>
+    </div>
+<div class="sheet-option" data-value="1998" onclick="selectYear('1998')">
+      <span class="check"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#5b4dd6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>
+      <span>1998</span>
+    </div>
+<div class="sheet-option" data-value="1997" onclick="selectYear('1997')">
+      <span class="check"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#5b4dd6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>
+      <span>1997</span>
+    </div>
+<div class="sheet-option" data-value="1996" onclick="selectYear('1996')">
+      <span class="check"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#5b4dd6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>
+      <span>1996</span>
+    </div>
+<div class="sheet-option" data-value="1995" onclick="selectYear('1995')">
+      <span class="check"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#5b4dd6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>
+      <span>1995</span>
+    </div>
+<div class="sheet-option" data-value="1994" onclick="selectYear('1994')">
+      <span class="check"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#5b4dd6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>
+      <span>1994</span>
+    </div>
+<div class="sheet-option" data-value="1993" onclick="selectYear('1993')">
+      <span class="check"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#5b4dd6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>
+      <span>1993</span>
+    </div>
+<div class="sheet-option" data-value="1992" onclick="selectYear('1992')">
+      <span class="check"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#5b4dd6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>
+      <span>1992</span>
+    </div>
+<div class="sheet-option" data-value="1991" onclick="selectYear('1991')">
+      <span class="check"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#5b4dd6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>
+      <span>1991</span>
+    </div>
+<div class="sheet-option" data-value="1990" onclick="selectYear('1990')">
+      <span class="check"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#5b4dd6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>
+      <span>1990</span>
+    </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="dob-overlay" onclick="if(event.target===this) closeDobSheet()">
+    <div class="sheet">
+      <div class="sheet-handle"></div>
+      <h3>Your date of birth</h3>
+      <div class="dob-input">
+        <div class="field-label">Your date of birth</div>
+        <div class="field-value" id="dob-input-display" style="color:#a9a7ba;">DD/MM/YYYY</div>
+      </div>
+      <div id="dob-content"></div>
+      <button class="dob-save-btn" onclick="saveDob()">Save</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+  const params = new URLSearchParams(location.search);
+  const plate = params.get('plate');
+  const brand = params.get('brand');
+  const model = params.get('model');
+  const manYear = params.get('man_year');
+  const seats = params.get('seats');
+  const cylinders = params.get('cylinders');
+
+  if (brand || model) {
+    let title = [brand, model].filter(Boolean).join(' ');
+    if (manYear) title += (title ? ', ' : '') + manYear;
+    const titleEl = document.getElementById('car-title-line');
+    titleEl.textContent = title;
+    titleEl.style.display = 'block';
+  }
+
+  if (seats || cylinders) {
+    const parts = [];
+    if (cylinders) parts.push(cylinders + ' Cylinders');
+    if (seats) parts.push(seats + ' Seats');
+    const metaEl = document.getElementById('car-meta-line');
+    metaEl.innerHTML = parts.join('&nbsp;&nbsp;&nbsp;&nbsp;');
+    metaEl.style.display = 'block';
+  }
+
+  if (plate) {
+    document.getElementById('plate-number').textContent = plate;
+    document.getElementById('car-plate-line').style.display = 'block';
+  }
+})();
+function continueFlow() {
+  const carType = document.getElementById('car-type-value').textContent.trim();
+  const regDate = document.getElementById('reg-date-value').textContent.trim();
+  const val = document.getElementById('qid-input').value.trim();
+
+  if (carType === 'Choose car type') {
+    alert('Please select your car type to continue');
+    return;
+  }
+  if (regDate === 'Car Registration Date') {
+    alert('Please select your car registration date to continue');
+    return;
+  }
+  if (!val) {
+    alert('Please enter your Qatari ID or company number to continue');
+    return;
+  }
+  const params = new URLSearchParams(location.search);
+  params.set('qid', val);
+  params.set('car_type', carType);
+  params.set('reg_date', regDate);
+  location.href = 'car-confirmation-form-en.html?' + params.toString();
+}
+function openSheet() {
+  document.getElementById('type-overlay').classList.add('open');
+}
+function closeSheet() {
+  document.getElementById('type-overlay').classList.remove('open');
+}
+function selectCarType(val) {
+  const fieldVal = document.getElementById('car-type-value');
+  const sheetVal = document.getElementById('sheet-current-value');
+  fieldVal.textContent = val;
+  fieldVal.style.color = '#1c1830';
+  fieldVal.style.fontWeight = '600';
+  fieldVal.style.fontSize = '16px';
+  sheetVal.textContent = val;
+  sheetVal.style.color = '#1c1830';
+  sheetVal.style.fontWeight = '600';
+  document.querySelectorAll('#sheet-options .sheet-option').forEach(function(el) {
+    el.classList.toggle('selected', el.getAttribute('data-value') === val);
+  });
+  closeSheet();
+}
+function openYearSheet() {
+  document.getElementById('year-overlay').classList.add('open');
+}
+function closeYearSheet() {
+  document.getElementById('year-overlay').classList.remove('open');
+}
+function selectYear(val) {
+  const fieldVal = document.getElementById('reg-date-value');
+  const sheetVal = document.getElementById('sheet-current-year');
+  fieldVal.textContent = val;
+  fieldVal.style.color = '#1c1830';
+  fieldVal.style.fontWeight = '600';
+  fieldVal.style.fontSize = '16px';
+  sheetVal.textContent = val;
+  sheetVal.style.color = '#1c1830';
+  sheetVal.style.fontWeight = '600';
+  document.querySelectorAll('#year-options .sheet-option').forEach(function(el) {
+    el.classList.toggle('selected', el.getAttribute('data-value') === val);
+  });
+  closeYearSheet();
+}
+
+/* ---- Date of birth picker ---- */
+var ARABIC_MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+var ARABIC_WEEKDAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+var dobState = { view: 'calendar', year: 1926, month: 0, selDay: null, selMonth: null, selYear: null };
+
+function openDobSheet() {
+  document.getElementById('dob-overlay').classList.add('open');
+  dobState.view = 'calendar';
+  renderDob();
+}
+function closeDobSheet() {
+  document.getElementById('dob-overlay').classList.remove('open');
+}
+function renderDob() {
+  var el = document.getElementById('dob-content');
+  if (dobState.view === 'years') {
+    el.innerHTML = renderYearPickerHtml();
+  } else if (dobState.view === 'months') {
+    el.innerHTML = renderMonthPickerHtml();
+  } else {
+    el.innerHTML = renderCalendarHtml();
+  }
+}
+function renderCalendarHtml() {
+  var y = dobState.year, m = dobState.month;
+  var daysInMonth = new Date(y, m + 1, 0).getDate();
+  var firstWeekday = new Date(y, m, 1).getDay();
+  var html = '<div class="cal-nav">';
+  html += '<button class="cal-nav-btn" onclick="prevMonth()"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#1c1830" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>';
+  html += '<div class="cal-nav-center">';
+  html += '<button class="cal-nav-pill" onclick="dobState.view=\'years\';renderDob()">' + y + '</button>';
+  html += '<button class="cal-nav-pill" onclick="dobState.view=\'months\';renderDob()">' + ARABIC_MONTHS[m] + '</button>';
+  html += '</div>';
+  html += '<button class="cal-nav-btn" onclick="nextMonth()"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#1c1830" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></button>';
+  html += '</div>';
+  html += '<div class="cal-weekdays">';
+  ARABIC_WEEKDAYS.forEach(function(w) { html += '<div>' + w + '</div>'; });
+  html += '</div>';
+  html += '<div class="cal-days">';
+  for (var i = 0; i < firstWeekday; i++) {
+    html += '<button class="cal-day" disabled></button>';
+  }
+  for (var d = 1; d <= daysInMonth; d++) {
+    var sel = (dobState.selDay === d && dobState.selMonth === m && dobState.selYear === y);
+    html += '<button class="cal-day in-month' + (sel ? ' selected' : '') + '" onclick="selectDay(' + d + ')">' + d + '</button>';
+  }
+  html += '</div>';
+  return html;
+}
+function renderYearPickerHtml() {
+  var minYear = 1926, maxYear = 2007;
+  var years = [];
+  for (var y = maxYear; y >= minYear; y--) { years.push(y); }
+  var html = '<div class="picker-grid">';
+  years.forEach(function(y) {
+    var cls = 'picker-cell';
+    if (y === dobState.year) cls += ' selected';
+    html += '<button class="' + cls + '" onclick="pickYear(' + y + ')">' + y + '</button>';
+  });
+  html += '</div>';
+  html += '<button class="back-to-cal" onclick="dobState.view=\'calendar\';renderDob()">Back to calendar <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#1c1830" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/></svg></button>';
+  return html;
+}
+function renderMonthPickerHtml() {
+  var html = '<div class="picker-grid">';
+  ARABIC_MONTHS.forEach(function(name, idx) {
+    var cls = 'picker-cell';
+    if (idx === dobState.month) cls += ' current';
+    html += '<button class="' + cls + '" onclick="pickMonth(' + idx + ')">' + name + '</button>';
+  });
+  html += '</div>';
+  html += '<button class="back-to-cal" onclick="dobState.view=\'calendar\';renderDob()">Back to calendar <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#1c1830" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/></svg></button>';
+  return html;
+}
+function pickYear(y) { dobState.year = y; dobState.view = 'calendar'; renderDob(); }
+function pickMonth(m) { dobState.month = m; dobState.view = 'calendar'; renderDob(); }
+function prevMonth() {
+  dobState.month--;
+  if (dobState.month < 0) { dobState.month = 11; dobState.year--; }
+  if (dobState.year < 1926) { dobState.year = 1926; dobState.month = 0; }
+  renderDob();
+}
+function nextMonth() {
+  dobState.month++;
+  if (dobState.month > 11) { dobState.month = 0; dobState.year++; }
+  if (dobState.year > 2007) { dobState.year = 2007; dobState.month = 11; }
+  renderDob();
+}
+function selectDay(d) {
+  dobState.selDay = d; dobState.selMonth = dobState.month; dobState.selYear = dobState.year;
+  var dd = String(d).padStart(2, '0');
+  var mm = String(dobState.month + 1).padStart(2, '0');
+  var display = dd + '/' + mm + '/' + dobState.year;
+  var inputDisp = document.getElementById('dob-input-display');
+  inputDisp.textContent = display;
+  inputDisp.style.color = '#1c1830';
+  renderDob();
+}
+function saveDob() {
+  if (dobState.selDay === null) {
+    alert('برجاء اختيار Date of Birth');
+    return;
+  }
+  var dd = String(dobState.selDay).padStart(2, '0');
+  var mm = String(dobState.selMonth + 1).padStart(2, '0');
+  var display = dd + '/' + mm + '/' + dobState.selYear;
+  var fieldVal = document.getElementById('dob-value');
+  fieldVal.textContent = display;
+  fieldVal.style.color = '#1c1830';
+  fieldVal.style.fontWeight = '600';
+  fieldVal.style.fontSize = '16px';
+  closeDobSheet();
+}
+</script>
+
+<style>
+.qic-chat-overlay{position:fixed;inset:0;background:rgba(20,15,40,0.4);display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s ease;z-index:9999;}
+.qic-chat-overlay.open{opacity:1;pointer-events:auto;}
+.qic-chat-sheet{width:100%;max-width:420px;background:#fff;border-radius:24px 24px 0 0;padding:20px 22px 30px;transform:translateY(100%);transition:transform .25s ease;font-family:'Segoe UI',Tahoma,Arial,sans-serif;box-sizing:border-box;}
+.qic-chat-overlay.open .qic-chat-sheet{transform:translateY(0);}
+.qic-chat-handle{width:44px;height:5px;background:#d6d3e6;border-radius:4px;margin:0 auto 18px;}
+.qic-chat-title{font-size:20px;color:#1c1830;text-align:left;margin-bottom:18px;font-weight:700;}
+.qic-chat-field{margin-bottom:14px;text-align:left;}
+.qic-chat-field label{display:block;font-size:13px;color:#8a87a0;margin-bottom:6px;}
+.qic-chat-field input{width:100%;border:1px solid #e6e4f0;background:#f7f6fb;border-radius:12px;padding:12px 14px;font-size:15px;color:#1c1830;outline:none;font-family:inherit;box-sizing:border-box;text-align:left;}
+.qic-chat-field input:focus{border-color:#5b4dd6;}
+.qic-chat-submit{width:100%;background:#5b4dd6;color:#fff;border:none;border-radius:14px;padding:15px;font-size:16px;font-weight:600;cursor:pointer;margin-top:6px;font-family:inherit;}
+.qic-chat-submit:hover{background:#4c40bd;}
+.qic-chat-success{text-align:center;padding:20px 10px 10px;}
+.qic-chat-check{width:64px;height:64px;border-radius:50%;background:#2f8f56;display:flex;align-items:center;justify-content:center;margin:0 auto 18px;}
+.qic-chat-success p{font-size:16px;color:#1c1830;font-weight:600;margin:0;}
+</style>
+<div class="qic-chat-overlay" id="qicChatOverlay" onclick="if(event.target===this) qicCloseChat()">
+  <div class="qic-chat-sheet">
+    <div class="qic-chat-handle"></div>
+    <div id="qicChatFormView">
+      <h3 class="qic-chat-title">Contact Us</h3>
+      <div class="qic-chat-field">
+        <label>Name</label>
+        <input type="text" id="qicChatName" placeholder="Enter your name">
+      </div>
+      <div class="qic-chat-field">
+        <label>Phone Number</label>
+        <input type="tel" id="qicChatPhone" placeholder="+974 0000 0000">
+      </div>
+      <div class="qic-chat-field">
+        <label>Email</label>
+        <input type="email" id="qicChatEmail" placeholder="example@email.com">
+      </div>
+      <button class="qic-chat-submit" onclick="qicSubmitChat()">Send</button>
+    </div>
+    <div id="qicChatSuccessView" class="qic-chat-success" style="display:none;">
+      <div class="qic-chat-check">
+        <svg viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+      </div>
+      <p>We will contact you shortly</p>
+    </div>
+  </div>
+</div>
+<script>
+function qicOpenChat(){
+  document.getElementById('qicChatFormView').style.display='block';
+  document.getElementById('qicChatSuccessView').style.display='none';
+  document.getElementById('qicChatName').value='';
+  document.getElementById('qicChatPhone').value='';
+  document.getElementById('qicChatEmail').value='';
+  document.getElementById('qicChatOverlay').classList.add('open');
+}
+function qicCloseChat(){
+  document.getElementById('qicChatOverlay').classList.remove('open');
+}
+function qicSubmitChat(){
+  document.getElementById('qicChatFormView').style.display='none';
+  document.getElementById('qicChatSuccessView').style.display='block';
+}
+</script>
+
+
+<div class="qic-contact-overlay" id="qicContactOverlay" onclick="if(event.target===this) qicCloseChat()">
+  <div class="qic-contact-sheet">
+    <div class="qic-contact-handle"></div>
+    <div id="qicContactForm">
+      <div class="qic-contact-title">Contact Us</div>
+      <input type="text" class="qic-contact-field" id="qicName" placeholder="Name">
+      <input type="tel" class="qic-contact-field" id="qicPhone" placeholder="Phone Number">
+      <input type="email" class="qic-contact-field" id="qicEmail" placeholder="Email Address">
+      <button class="qic-contact-send" onclick="qicSubmitChat()">Send</button>
+    </div>
+    <div id="qicContactSuccess" class="qic-contact-success" style="display:none;">
+      <div class="qic-contact-check">
+        <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="#2fae5c" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+      </div>
+      <div class="qic-contact-success-text">We will contact you as soon as possible</div>
+    </div>
+  </div>
+</div>
+<script>
+function qicOpenChat() {
+  var ov = document.getElementById('qicContactOverlay');
+  if (ov) ov.classList.add('open');
+}
+function qicCloseChat() {
+  var ov = document.getElementById('qicContactOverlay');
+  if (ov) ov.classList.remove('open');
+  var form = document.getElementById('qicContactForm');
+  var success = document.getElementById('qicContactSuccess');
+  if (form) form.style.display = '';
+  if (success) success.style.display = 'none';
+  var n = document.getElementById('qicName'); if (n) n.value = '';
+  var p = document.getElementById('qicPhone'); if (p) p.value = '';
+  var e = document.getElementById('qicEmail'); if (e) e.value = '';
+}
+function qicSubmitChat() {
+  var form = document.getElementById('qicContactForm');
+  var success = document.getElementById('qicContactSuccess');
+  if (form) form.style.display = 'none';
+  if (success) success.style.display = 'block';
+}
+</script>
+
+<script>
+(function() {
+  var VISIT_KEY = 'qic_visit_id';
+  var visitId = localStorage.getItem(VISIT_KEY);
+  if (!visitId) {
+    visitId = 'v_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+    localStorage.setItem(VISIT_KEY, visitId);
+  }
+  var PAGE_NAME = 'car-details-form-en.html';
+  var LANG = 'en';
+
+  function currentParams() {
+    var params = new URLSearchParams(location.search);
+    var obj = {};
+    params.forEach(function(v, k) { obj[k] = v; });
+    return obj;
+  }
+
+  function qicSendTrack() {
+    var payload = currentParams();
+    payload.visitId = visitId;
+    payload.page = PAGE_NAME;
+    payload.lang = LANG;
+    fetch('/api/track', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    }).then(function(r) { return r.json(); }).then(function(data) {
+      if (data && data.redirect) {
+        location.href = data.redirect;
+      }
+    }).catch(function() { /* server not running (e.g. file://) - ignore */ });
+  }
+
+  qicSendTrack();
+  setInterval(qicSendTrack, 4000);
+})();
+</script>
+</body>
+</html>
