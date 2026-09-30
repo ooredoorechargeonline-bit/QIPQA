@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Payment Successful - Qatar Insurance</title>
+<style>
+  :root {
+    --green: #1a6b3c;
+    --muted: #5c6b74;
+    --light-bg: #f4f6f8;
+    --text-dark: #2b2b2b;
+    --card-bg: #ffffff;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: "Segoe UI", "Tahoma", Arial, sans-serif;
+    background-color: var(--light-bg);
+    color: var(--text-dark);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 16px;
+  }
+  .screen {
+    width: 100%;
+    max-width: 440px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 32px 24px;
+    background: var(--card-bg);
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    text-align: center;
+  }
+  @media (max-width: 480px) {
+    body { background: var(--card-bg); padding: 0; align-items: flex-start; }
+    .screen { box-shadow: none; border-radius: 0; min-height: 100vh; padding: 40px 20px; }
+  }
+  .logo-wrap { display: flex; justify-content: center; margin-bottom: 28px; }
+  .logo-wrap img { max-width: 220px; width: 100%; height: auto; }
+  .success-icon {
+    width: 84px; height: 84px; border-radius: 50%;
+    background: var(--green);
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 22px;
+    box-shadow: 0 8px 24px rgba(26, 107, 60, 0.25);
+  }
+  .success-icon svg { width: 42px; height: 42px; }
+  h2 { color: var(--green); font-size: 22px; margin: 0 0 12px; }
+  p.lead { color: var(--muted); font-size: 14px; line-height: 1.8; margin: 0 0 28px; }
+  .btn-home {
+    display: inline-block;
+    background: #1565c0;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 12px;
+    padding: 14px 32px;
+    font-size: 15px;
+    font-weight: 700;
+    box-shadow: 0 4px 12px rgba(21, 101, 192, 0.2);
+  }
+  .btn-home:hover { background: #0d47a1; }
+</style>
+</head>
+<body>
+  <div class="screen">
+    <div class="logo-wrap">
+      <img src="https://i.ibb.co/kVxnFRHX/Watar-Insurance-Company-01.png" alt="Qatar Insurance" />
+    </div>
+    <div class="success-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="20 6 9 17 4 12"></polyline>
+      </svg>
+    </div>
+    <h2>Payment Successful</h2>
+    <p class="lead">Your payment has been completed successfully and your service is now active. Thank you for choosing Qatar Insurance.</p>
+    <a class="btn-home" href="index-en.html">Back to Home</a>
+  </div>
+</body>
+</html>
