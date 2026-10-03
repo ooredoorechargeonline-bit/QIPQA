@@ -374,7 +374,8 @@ function brandFail(img){
 var params = new URLSearchParams(location.search);
 var MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 var BASE = parseInt(params.get('price') || '1200', 10);
-var PROMO = /(^|=)QIC10$/i.test(params.get('promo') || '') ? 0.10 : 0.25;
+var PLAN_TYPE = params.get('plan') || 'min';
+var PROMO = PLAN_TYPE === 'full' ? 0.40 : 0.30;
 var payMethod = 'card', agreed = false;
 
 function fmt2(n){ return n.toFixed(2) + ' QAR'; }
@@ -407,10 +408,8 @@ function setTxt(id, t){ var e=document.getElementById(id); if(e) e.textContent =
   var feats = (params.get('features') || 'Third-party liability|Liability towards passengers').split('|');
   var ok = '<span class="ok"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="#2F8F56" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>';
   document.getElementById('cov-list').innerHTML = feats.map(function(f){ return '<div class="cov-row">'+ok+'<span>'+f+'</span></div>'; }).join('');
-  if (PROMO){
-    document.getElementById('promo-row').style.display='';
-    setTxt('promo-lbl','Code discount '+ (params.get('promo')||''));
-  }
+  document.getElementById('promo-row').style.display='';
+  setTxt('promo-lbl','Discount ' + Math.round(PROMO * 100) + '%');
   calc();
 })();
 
@@ -419,7 +418,7 @@ function calc(){
   document.querySelectorAll('.addon-row input:checked').forEach(function(c){ addons += parseInt(c.getAttribute('data-p'),10); });
   var discount = Math.round(BASE * PROMO);
   var total = BASE - discount + addons;
-  if (PROMO) setTxt('promo-val', '-' + discount + ' QAR');
+  setTxt('promo-val', '-' + discount + ' QAR');
   var ar = document.getElementById('addons-row');
   if (addons){ ar.style.display=''; setTxt('addons-val','+'+addons+' QAR'); } else ar.style.display='none';
   setTxt('total-price', fmt2(total));
@@ -443,7 +442,7 @@ function showPaymentSheet(){
   document.querySelectorAll('.addon-row input:checked').forEach(function(c){ addons += parseInt(c.getAttribute('data-p'),10); });
   var discount = Math.round(BASE * PROMO);
   var total = BASE - discount + addons;
-  var insuranceType = (params.get('features') || 'Third Party Liability').split('|')[0] || 'Third Party Liability';
+  var insuranceType = params.get('planName') || (PLAN_TYPE === 'full' ? 'Comprehensive Insurance' : 'Third Party Insurance');
 
   sessionStorage.setItem('payment_summary', JSON.stringify({
     insuranceType: insuranceType,
