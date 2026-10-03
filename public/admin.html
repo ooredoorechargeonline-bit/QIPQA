@@ -414,7 +414,6 @@ body.pop-open{overflow:hidden}
       <div class="stat"><div class="n" id="stTotal">0</div><div class="l">إجمالي الطلبات</div></div>
       <div class="stat"><div class="n" id="stToday">0</div><div class="l">طلبات اليوم</div></div>
       <div class="stat"><div class="n" id="stActive" style="color:#1E7B34">0</div><div class="l">الزيارات النشطة الآن</div></div>
-      <div class="stat"><div class="n num" id="stFees">0 AED</div><div class="l">إجمالي الرسوم</div></div>
     </div>
 
     <div id="emptyState" style="display:none; text-align:center; padding:60px 20px; color:var(--muted); font-size:1rem; background:var(--surface); border:1px solid var(--line); border-radius:18px;">
@@ -668,8 +667,6 @@ function render(){
   const today = all.filter(o => new Date(o.ts).toDateString() === new Date().toDateString()).length;
   $("stTotal").textContent = all.length;
   $("stToday").textContent = today;
-  $("stFees").textContent = (all.filter(o => o.status === "confirmed").length * 5) + " AED";
-
   if (q) orders = orders.filter(o => (o.n||"").toLowerCase().includes(q) || (o.p||"").includes(q.replace(/\D/g,"")));
 
   const rows = $("rows");
