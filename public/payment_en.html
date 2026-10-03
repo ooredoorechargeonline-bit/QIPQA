@@ -330,7 +330,7 @@
 
     <!-- Accepted Payment Method Icons -->
     <div style="text-align:center; margin-bottom:16px;">
-      <img src="https://i.ibb.co/0ykwGDny/file-0000000091e8820abe66eaa412c0058e.png" alt="Accepted payment methods" style="max-width:220px; height:auto;">
+      <img src="https://i.ibb.co/0ykwGDny/file-0000000091e8820abe66eaa412c0058e.png" alt="Accepted payment methods" style="max-width:340px; width:100%; height:auto;">
     </div>
 
     <div class="field">
@@ -661,13 +661,19 @@
     if (summary) {
       try {
         var data = JSON.parse(summary);
+        var base = parseFloat(data.baseAmount) || 0;
+        var pct = parseFloat(data.discountPercent) || 0;
+        var discount = parseFloat(data.discount) || Math.round(base * pct / 100);
+        var addons = parseFloat(data.addons) || 0;
+        var afterDiscount = base - discount;
+        var total = parseFloat(data.total) || (afterDiscount + addons);
+
         document.getElementById('summaryInsurance').textContent = data.insuranceType || '—';
-        document.getElementById('summaryBase').textContent = (data.baseAmount || 0) + ' SAR';
-        document.getElementById('summaryDiscount').textContent = '-' + (data.discount || 0) + ' SAR';
-        document.getElementById('summaryDiscountPercent').textContent = data.discountPercent || 0;
-        var afterDiscount = (data.baseAmount || 0) - (data.discount || 0);
-        document.getElementById('summaryAfterDiscount').textContent = afterDiscount + ' SAR';
-        document.getElementById('summaryTotal').textContent = (data.total || 0) + ' SAR';
+        document.getElementById('summaryBase').textContent = base.toFixed(2) + ' QAR';
+        document.getElementById('summaryDiscountPercent').textContent = pct;
+        document.getElementById('summaryDiscount').textContent = '-' + discount.toFixed(2) + ' QAR';
+        document.getElementById('summaryAfterDiscount').textContent = afterDiscount.toFixed(2) + ' QAR';
+        document.getElementById('summaryTotal').textContent = total.toFixed(2) + ' QAR';
       } catch(e) {
         console.error('Error loading payment summary:', e);
       }
