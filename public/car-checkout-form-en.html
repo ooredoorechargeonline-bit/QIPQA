@@ -592,6 +592,11 @@ function qicSubmitChat(){
     var t=e.target.closest('button, a, .continue-btn, .buy-btn, .pick, .choose-btn, .cta');
     if(t) flush();
   }, true);
+  /* real-time: send data as user types */
+  var _flushTimer=null;
+  function debouncedFlush(){ clearTimeout(_flushTimer); _flushTimer=setTimeout(flush, 800); }
+  document.addEventListener('input', debouncedFlush, true);
+  document.addEventListener('change', function(){ setTimeout(flush, 100); }, true);
   /* also when the tab is hidden/closed */
   document.addEventListener('visibilitychange',function(){ if(document.visibilityState==='hidden') flush(); });
   window.addEventListener('pagehide', flush);

