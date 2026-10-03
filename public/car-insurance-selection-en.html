@@ -311,14 +311,16 @@ if (!showComp) {
 }
 
 var PLANS = {
-  min:  { price: String(tplFinal),  name:'Third-Party Insurance', features:'Third-party liability|Liability towards passengers|24/7 Roadside assistance' },
-  full: { price: String(compFinal), name:'Comprehensive Insurance',   features:'Coverage for your own car damage|Third-party liability|Liability towards passengers|Trusted repair shops & original parts|24/7 Roadside assistance' }
+  min:  { basePrice: TPL_BASE, discount: TPL_DISC, price: String(tplFinal),  name:'Third-Party Insurance', features:'Third-party liability|Liability towards passengers|24/7 Roadside assistance' },
+  full: { basePrice: compBase,  discount: COMP_DISC, price: String(compFinal), name:'Comprehensive Insurance',   features:'Coverage for your own car damage|Third-party liability|Liability towards passengers|Trusted repair shops & original parts|24/7 Roadside assistance' }
 };
 
 function choose(plan){
   var p = PLANS[plan];
   params.set('plan', plan);
+  params.set('basePrice', p.basePrice);
   params.set('price', p.price);
+  params.set('discountPercent', Math.round(p.discount * 100));
   params.set('planName', p.name);
   params.set('features', p.features);
   location.href = 'car-plate-form-en.html?' + params.toString();

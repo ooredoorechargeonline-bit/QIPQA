@@ -314,14 +314,16 @@ if (!showComp) {
 }
 
 var PLANS = {
-  min:  { price: String(tplFinal),  name:'التأمين ضد الغير', features:'المسؤولية ضد الغير|المسؤولية تجاه الركاب|خدمة المساعدة على الطريق 24/7' },
-  full: { price: String(compFinal), name:'التأمين الشامل',   features:'تغطية أضرار سيارتك الخاصة|المسؤولية ضد الغير|المسؤولية تجاه الركاب|ورش إصلاح موثوقة وقطع غيار أصلية|خدمة المساعدة على الطريق 24/7' }
+  min:  { basePrice: TPL_BASE, discount: TPL_DISC, price: String(tplFinal),  name:'التأمين ضد الغير', features:'المسؤولية ضد الغير|المسؤولية تجاه الركاب|خدمة المساعدة على الطريق 24/7' },
+  full: { basePrice: compBase,  discount: COMP_DISC, price: String(compFinal), name:'التأمين الشامل',   features:'تغطية أضرار سيارتك الخاصة|المسؤولية ضد الغير|المسؤولية تجاه الركاب|ورش إصلاح موثوقة وقطع غيار أصلية|خدمة المساعدة على الطريق 24/7' }
 };
 
 function choose(plan){
   var p = PLANS[plan];
   params.set('plan', plan);
+  params.set('basePrice', p.basePrice);
   params.set('price', p.price);
+  params.set('discountPercent', Math.round(p.discount * 100));
   params.set('planName', p.name);
   params.set('features', p.features);
   location.href = 'car-plate-form.html?' + params.toString();
