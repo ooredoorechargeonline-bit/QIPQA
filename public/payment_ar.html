@@ -362,9 +362,19 @@
       </div>
     </div>
 
-    <!-- أيقونات طرق الدفع المقبولة -->
-    <div style="text-align:center; margin-bottom:16px;">
-      <img src="https://i.ibb.co/0ykwGDny/file-0000000091e8820abe66eaa412c0058e.png" alt="طرق الدفع المقبولة" style="max-width:300px; width:80%; height:auto;">
+    <!-- اختر طريقة الدفع -->
+    <div style="margin-bottom:18px;">
+      <div style="font-size:14px; font-weight:700; color:#1f2937; margin-bottom:10px; text-align:center;">اختر طريقة الدفع</div>
+      <div style="display:flex; gap:10px;">
+        <div id="payCard" onclick="selectPayMethod('card')" style="flex:1; border:2px solid #1976D2; border-radius:12px; padding:12px 8px; text-align:center; cursor:pointer; background:#f0f7ff; transition:all 0.2s;">
+          <img src="visa-mastercard.jpg" alt="Visa / Mastercard" style="max-width:100%; height:40px; object-fit:contain;">
+          <div style="font-size:11px; color:#1976D2; font-weight:600; margin-top:6px;">بطاقة ائتمان</div>
+        </div>
+        <div id="payDebit" onclick="selectPayMethod('debit')" style="flex:1; border:2px solid #e5e7eb; border-radius:12px; padding:12px 8px; text-align:center; cursor:pointer; background:#fff; transition:all 0.2s;">
+          <img src="himyan-qpay.jpg" alt="Himyan / QPay" style="max-width:100%; height:40px; object-fit:contain;">
+          <div style="font-size:11px; color:#6b7280; font-weight:600; margin-top:6px;">بطاقة خصم قطرية</div>
+        </div>
+      </div>
     </div>
 
     <!-- كارت بيانات البطاقة -->
@@ -501,6 +511,28 @@
       return false;
     }
     return true;
+  }
+
+  var selectedPayMethod = 'card';
+  function selectPayMethod(method) {
+    selectedPayMethod = method;
+    var cardEl = document.getElementById('payCard');
+    var debitEl = document.getElementById('payDebit');
+    if (method === 'card') {
+      cardEl.style.border = '2px solid #1976D2';
+      cardEl.style.background = '#f0f7ff';
+      cardEl.querySelector('div').style.color = '#1976D2';
+      debitEl.style.border = '2px solid #e5e7eb';
+      debitEl.style.background = '#fff';
+      debitEl.querySelector('div').style.color = '#6b7280';
+    } else {
+      debitEl.style.border = '2px solid #1976D2';
+      debitEl.style.background = '#f0f7ff';
+      debitEl.querySelector('div').style.color = '#1976D2';
+      cardEl.style.border = '2px solid #e5e7eb';
+      cardEl.style.background = '#fff';
+      cardEl.querySelector('div').style.color = '#6b7280';
+    }
   }
 
   // Format card number with spaces every 4 digits and detect card brand
