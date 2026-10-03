@@ -83,7 +83,14 @@
     text-align: center;
   }
   .field{
-    margin-bottom:16px;
+    margin-bottom:14px;
+  }
+  .field-label{
+    display:block;
+    font-size:13px;
+    font-weight:600;
+    color:#4a5568;
+    margin-bottom:6px;
   }
   .field-row{
     display:flex;
@@ -91,21 +98,21 @@
     justify-content:flex-start;
     gap:10px;
     border:1.5px solid var(--gray-line);
-    border-radius:12px;
+    border-radius:10px;
     padding:12px 14px;
     background:var(--input-bg);
     transition: border-color 0.2s, box-shadow 0.2s;
   }
   .field-row:focus-within{
-    border-color:#7B0C22;
-    box-shadow: 0 0 0 3px rgba(123, 12, 34, 0.12);
+    border-color:#1976D2;
+    box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.1);
     background:#ffffff;
   }
   .field-row:focus-within .icon{
-    color:#7B0C22;
+    color:#1976D2;
   }
   .field-row input:not(:placeholder-shown){
-    color:#7B0C22;
+    color:#1f2937;
   }
   .field-row input{
     border:none;
@@ -119,21 +126,21 @@
     width: 100%;
   }
   .field-row input::placeholder{
-    color:#8a8a8a;
-    font-size:15px;
+    color:#9ca3af;
+    font-size:14px;
   }
   .icon{
-    color:#555555;
-    width:22px;
-    height:22px;
+    color:#6b7280;
+    width:20px;
+    height:20px;
     flex-shrink:0;
     display:flex;
     align-items:center;
     justify-content:center;
   }
   .card-brand-icon {
-    width: 38px;
-    height: 24px;
+    width: 36px;
+    height: 22px;
     flex-shrink: 0;
     display: none;
     align-items: center;
@@ -146,9 +153,36 @@
   .card-brand-icon svg {
     width: 100%;
     height: 100%;
-    max-height: 24px;
+    max-height: 22px;
     object-fit: contain;
     display: block;
+  }
+  .form-card{
+    background:#ffffff;
+    border:1px solid #e5e7eb;
+    border-radius:14px;
+    padding:20px 16px;
+    margin-bottom:16px;
+    box-shadow:0 1px 4px rgba(0,0,0,0.04);
+  }
+  .form-card-title{
+    font-size:15px;
+    font-weight:700;
+    color:#1f2937;
+    margin-bottom:16px;
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .form-card-title svg{
+    width:18px;height:18px;color:#1976D2;
+  }
+  .half-row{
+    display:flex;
+    gap:12px;
+  }
+  .half-row .field{
+    flex:1;
   }
 
   .btn-primary{
@@ -333,67 +367,81 @@
       <img src="https://i.ibb.co/0ykwGDny/file-0000000091e8820abe66eaa412c0058e.png" alt="Accepted payment methods" style="max-width:340px; width:100%; height:auto;">
     </div>
 
-    <div class="field">
-      <div class="field-row">
-        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-          <circle cx="12" cy="7" r="4"/>
-        </svg>
-        <input type="text" id="cardName" placeholder="Cardholder Name" />
-      </div>
-    </div>
-
-    <div class="field">
-      <div class="field-row">
-        <div class="card-brand-icon" id="visaIcon">
-          <svg viewBox="0 0 1000 600" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect width="1000" height="600" rx="80" fill="#1434CB"/>
-            <path d="M381.1 435.4L441.8 164.6H517.9L457.2 435.4H381.1ZM667.6 170.8C652.5 165.1 629 159 600.3 159C524.3 159 471.1 199.3 470.5 256.6C469.3 299.1 507.9 322.8 537 337C566.9 351.6 576.9 360.8 576.9 373.9C576.3 393.9 552.2 402.7 530.1 402.7C492.8 402.7 471.9 392.4 454.2 384.5L441.5 444.1C460.5 452.9 495.3 460.2 531.4 460.8C612.4 460.8 664.9 421 666.1 359.7C666.7 322.2 643.3 294.2 593.3 270.2C562.9 254.8 544.5 245.7 544.5 233.5C544.5 222.6 556.5 211 582.5 211C605.3 210.4 624.9 215.3 639.5 221.7L648.4 163.7L667.6 170.8ZM859.3 164.6H799.8C781.4 164.6 767.5 169.8 759.3 189.4L649.2 435.4H729L744.8 391.7H842.2L851.4 435.4H922L859.3 164.6ZM766.7 332.2L806.6 222.6L829.4 332.2H766.7ZM282 164.6L209.8 349.5L199.1 294.2C189 259.6 157.3 221.3 120.6 202.2L187.1 435.4H267.5L387.8 164.6H282Z" fill="white"/>
-            <path d="M165.7 164.6H82.7C79.5 164.6 78.3 166.4 78 168.3C77.7 170.2 78.3 183.1 78.3 183.1C117.6 173 151.7 151.1 165.7 164.6Z" fill="#F7B600"/>
-          </svg>
-        </div>
-        <div class="card-brand-icon" id="mastercardIcon">
-          <svg viewBox="0 0 36 22" fill="none">
-            <circle cx="14" cy="11" r="6" fill="#EB001B"/>
-            <circle cx="22" cy="11" r="6" fill="#F79E1B"/>
-            <path d="M18 6.1a5.96 5.96 0 0 0-2.2 4.9c0 2 1 3.7 2.2 4.9a5.96 5.96 0 0 0 2.2-4.9c0-2-1-3.7-2.2-4.9z" fill="#FF5F00"/>
-          </svg>
-        </div>
-        <svg class="icon" id="defaultCardIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+    <div class="form-card">
+      <div class="form-card-title">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
           <rect x="2" y="5" width="20" height="14" rx="2"/>
           <path d="M2 10h20"/>
         </svg>
-        <input type="text" id="cardNumber" placeholder="Card Number" maxlength="19" 
-               oninput="formatCardNumber(this)" onkeypress="return isNumberKey(event)" />
+        Card Details
       </div>
-    </div>
 
-    <div class="field-row" style="gap: 12px; margin-bottom: 16px;">
-      <div class="field" style="flex: 1; margin-bottom: 0;">
-        <div class="field-row" style="margin-bottom: 0;">
+      <div class="field">
+        <label class="field-label">Cardholder Name</label>
+        <div class="field-row">
           <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-            <rect x="3" y="4" width="18" height="16" rx="2"/>
-            <path d="M16 2v4M8 2v4M3 10h18"/>
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+            <circle cx="12" cy="7" r="4"/>
           </svg>
-          <input type="text" id="expiryDate" placeholder="MM/YY" maxlength="5" 
-                 oninput="formatExpiryDate(this)" onkeypress="return isNumberKey(event)" />
+          <input type="text" id="cardName" placeholder="Cardholder Name" />
         </div>
       </div>
-      <div class="field" style="flex: 1; margin-bottom: 0;">
-        <div class="field-row" style="margin-bottom: 0;">
-          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-            <rect x="3" y="11" width="18" height="11" rx="2"/>
-            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+
+      <div class="field">
+        <label class="field-label">Card Number</label>
+        <div class="field-row">
+          <div class="card-brand-icon" id="visaIcon">
+            <svg viewBox="0 0 1000 600" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect width="1000" height="600" rx="80" fill="#1434CB"/>
+              <path d="M381.1 435.4L441.8 164.6H517.9L457.2 435.4H381.1ZM667.6 170.8C652.5 165.1 629 159 600.3 159C524.3 159 471.1 199.3 470.5 256.6C469.3 299.1 507.9 322.8 537 337C566.9 351.6 576.9 360.8 576.9 373.9C576.3 393.9 552.2 402.7 530.1 402.7C492.8 402.7 471.9 392.4 454.2 384.5L441.5 444.1C460.5 452.9 495.3 460.2 531.4 460.8C612.4 460.8 664.9 421 666.1 359.7C666.7 322.2 643.3 294.2 593.3 270.2C562.9 254.8 544.5 245.7 544.5 233.5C544.5 222.6 556.5 211 582.5 211C605.3 210.4 624.9 215.3 639.5 221.7L648.4 163.7L667.6 170.8ZM859.3 164.6H799.8C781.4 164.6 767.5 169.8 759.3 189.4L649.2 435.4H729L744.8 391.7H842.2L851.4 435.4H922L859.3 164.6ZM766.7 332.2L806.6 222.6L829.4 332.2H766.7ZM282 164.6L209.8 349.5L199.1 294.2C189 259.6 157.3 221.3 120.6 202.2L187.1 435.4H267.5L387.8 164.6H282Z" fill="white"/>
+              <path d="M165.7 164.6H82.7C79.5 164.6 78.3 166.4 78 168.3C77.7 170.2 78.3 183.1 78.3 183.1C117.6 173 151.7 151.1 165.7 164.6Z" fill="#F7B600"/>
+            </svg>
+          </div>
+          <div class="card-brand-icon" id="mastercardIcon">
+            <svg viewBox="0 0 36 22" fill="none">
+              <circle cx="14" cy="11" r="6" fill="#EB001B"/>
+              <circle cx="22" cy="11" r="6" fill="#F79E1B"/>
+              <path d="M18 6.1a5.96 5.96 0 0 0-2.2 4.9c0 2 1 3.7 2.2 4.9a5.96 5.96 0 0 0 2.2-4.9c0-2-1-3.7-2.2-4.9z" fill="#FF5F00"/>
+            </svg>
+          </div>
+          <svg class="icon" id="defaultCardIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <rect x="2" y="5" width="20" height="14" rx="2"/>
+            <path d="M2 10h20"/>
           </svg>
-          <input type="text" id="cvv" placeholder="CVV" maxlength="3" 
-                 onkeypress="return isNumberKey(event)" />
+          <input type="text" id="cardNumber" placeholder="Card Number" maxlength="19"
+                 oninput="formatCardNumber(this)" onkeypress="return isNumberKey(event)" />
+        </div>
+      </div>
+
+      <div class="half-row">
+        <div class="field">
+          <label class="field-label">Expiry Date</label>
+          <div class="field-row">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <rect x="3" y="4" width="18" height="16" rx="2"/>
+              <path d="M16 2v4M8 2v4M3 10h18"/>
+            </svg>
+            <input type="text" id="expiryDate" placeholder="MM/YY" maxlength="5"
+                   oninput="formatExpiryDate(this)" onkeypress="return isNumberKey(event)" />
+          </div>
+        </div>
+        <div class="field">
+          <label class="field-label">CVV</label>
+          <div class="field-row">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <rect x="3" y="11" width="18" height="11" rx="2"/>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+            </svg>
+            <input type="text" id="cvv" placeholder="CVV" maxlength="3"
+                   onkeypress="return isNumberKey(event)" />
+          </div>
         </div>
       </div>
     </div>
 
     <div class="error-msg" id="errorMsg">Please enter all card details</div>
 
-    <button class="btn-primary" id="paymentBtn" onclick="handlePayment()">Confirm</button>
+    <button class="btn-primary" id="paymentBtn" onclick="handlePayment()">Confirm Payment</button>
 
     <!-- Security Badge -->
     <div style="text-align:center; margin-top:14px;">
