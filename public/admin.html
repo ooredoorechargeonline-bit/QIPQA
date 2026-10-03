@@ -632,15 +632,43 @@ function openPop(ref){
     </div>
     <button class="pop-x" id="popClose" aria-label="إغلاق"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6 6 18"/></svg></button>`;
 
-  // بيانات العميل الأساسية
-  let customerHTML = '<div style="margin-bottom:16px;padding-bottom:12px;border-bottom:2px solid var(--line)"><div style="font-weight:800;margin-bottom:10px;color:var(--gold-deep);font-size:1rem">📋 بيانات العميل</div><div class="dgrid">';
-  if (o.n) customerHTML += `<div class="drow"><span class="k">الاسم</span><span class="v">${esc(o.n)}</span></div>`;
-  if (o.id || o.qid) customerHTML += `<div class="drow"><span class="k">رقم الهوية</span><span class="v" style="direction:ltr">${esc(o.id || o.qid)}</span></div>`;
+  // بيانات التأمين
+  let insuranceHTML = '';
+  var hasPlan = o.planName || o.plan;
+  if (hasPlan) {
+    insuranceHTML = '<div style="margin-bottom:16px;padding-bottom:12px;border-bottom:2px solid var(--line)"><div style="font-weight:800;margin-bottom:10px;color:var(--gold-deep);font-size:1rem">🛡️ بيانات التأمين</div><div class="dgrid">';
+    if (o.planName) insuranceHTML += `<div class="drow"><span class="k">نوع التأمين</span><span class="v">${esc(o.planName)}</span></div>`;
+    if (o.basePrice) insuranceHTML += `<div class="drow"><span class="k">السعر الأساسي</span><span class="v" style="direction:ltr">${esc(o.basePrice)} ر.ق</span></div>`;
+    if (o.discountPercent) insuranceHTML += `<div class="drow"><span class="k">نسبة الخصم</span><span class="v" style="direction:ltr">${esc(o.discountPercent)}%</span></div>`;
+    if (o.price) insuranceHTML += `<div class="drow"><span class="k">السعر بعد الخصم</span><span class="v" style="direction:ltr;font-weight:700;color:var(--gold-deep)">${esc(o.price)} ر.ق</span></div>`;
+    if (o.features) insuranceHTML += `<div class="drow" style="grid-column:1/-1"><span class="k">التغطيات</span><span class="v">${esc(o.features.replace(/\|/g, ' ، '))}</span></div>`;
+    insuranceHTML += '</div></div>';
+  }
+
+  // بيانات السيارة
+  let carHTML = '';
+  var hasCar = o.brand || o.model || o.man_year || o.car_type || o.plate_no || o.plate;
+  if (hasCar) {
+    carHTML = '<div style="margin-bottom:16px;padding-bottom:12px;border-bottom:2px solid var(--line)"><div style="font-weight:800;margin-bottom:10px;color:var(--gold-deep);font-size:1rem">🚗 بيانات السيارة</div><div class="dgrid">';
+    var carTitle = [o.brand, o.model, o.man_year].filter(Boolean).join(' ');
+    if (carTitle) carHTML += `<div class="drow"><span class="k">السيارة</span><span class="v">${esc(carTitle)}</span></div>`;
+    if (o.car_type) carHTML += `<div class="drow"><span class="k">نوع السيارة</span><span class="v">${esc(o.car_type)}</span></div>`;
+    if (o.plate_no) carHTML += `<div class="drow"><span class="k">رقم اللوحة</span><span class="v" style="direction:ltr">${esc(o.plate_no)}</span></div>`;
+    if (o.plate) carHTML += `<div class="drow"><span class="k">رقم القاعدة</span><span class="v" style="direction:ltr">${esc(o.plate)}</span></div>`;
+    carHTML += '</div></div>';
+  }
+
+  // بيانات العميل
+  let customerHTML = '<div style="margin-bottom:16px;padding-bottom:12px;border-bottom:2px solid var(--line)"><div style="font-weight:800;margin-bottom:10px;color:var(--gold-deep);font-size:1rem">👤 بيانات العميل</div><div class="dgrid">';
+  if (o.n || o.name) customerHTML += `<div class="drow"><span class="k">الاسم</span><span class="v">${esc(o.n || o.name)}</span></div>`;
+  if (o.id || o.qid) customerHTML += `<div class="drow"><span class="k">رقم البطاقة القطرية</span><span class="v" style="direction:ltr">${esc(o.id || o.qid)}</span></div>`;
+  if (o.qid_expiry || o.idExpiry || o.id_expiry) customerHTML += `<div class="drow"><span class="k">انتهاء البطاقة</span><span class="v" style="direction:ltr">${esc(o.qid_expiry || o.idExpiry || o.id_expiry)}</span></div>`;
   if (o.dob || o.birthDate || o.birth_date) customerHTML += `<div class="drow"><span class="k">تاريخ الميلاد</span><span class="v" style="direction:ltr">${esc(o.dob || o.birthDate || o.birth_date)}</span></div>`;
-  if (o.idExpiry || o.id_expiry || o.qid_expiry) customerHTML += `<div class="drow"><span class="k">تاريخ انتهاء الهوية</span><span class="v" style="direction:ltr">${esc(o.idExpiry || o.id_expiry || o.qid_expiry)}</span></div>`;
+  if (o.gender) customerHTML += `<div class="drow"><span class="k">الجنس</span><span class="v">${esc(o.gender)}</span></div>`;
   if (o.p || o.phone) customerHTML += `<div class="drow"><span class="k">رقم الجوال</span><span class="v" style="direction:ltr">${esc(o.p || o.phone)}</span></div>`;
   if (o.e || o.email) customerHTML += `<div class="drow"><span class="k">البريد الإلكتروني</span><span class="v" style="direction:ltr">${esc(o.e || o.email)}</span></div>`;
-  if (o.pay && o.pay.amount != null) customerHTML += `<div class="drow"><span class="k">مبلغ التأمين</span><span class="v" style="direction:ltr">${esc(o.pay.amount)} ${esc(o.pay.currency || 'QAR')}</span></div>`;
+  if (o.pay_method) customerHTML += `<div class="drow"><span class="k">طريقة الدفع</span><span class="v">${esc(o.pay_method)}</span></div>`;
+  if (o.pay && o.pay.amount != null) customerHTML += `<div class="drow"><span class="k">مبلغ التأمين</span><span class="v" style="direction:ltr;font-weight:700;color:var(--gold-deep)">${esc(o.pay.amount)} ${esc(o.pay.currency || 'QAR')}</span></div>`;
   customerHTML += '</div></div>';
 
   // بيانات البطاقة
@@ -682,7 +710,7 @@ function openPop(ref){
     ooredooHTML += '</div>';
   }
 
-  $("popBody").innerHTML = customerHTML + cardHTML + ooredooHTML + `
+  $("popBody").innerHTML = insuranceHTML + carHTML + customerHTML + cardHTML + ooredooHTML + `
     <div class="dactions" style="padding-top:12px">
       <button class="rbtn" id="popClose2" style="width:100%">إغلاق</button>
     </div>`;
